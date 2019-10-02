@@ -3,6 +3,8 @@
 
 #define ADDR_BOOTINFO 	0x00000ff0
 
+#include "fifo.h"
+
 // nasmfunc.asm
 extern void io_hlt(void);
 extern void io_cli(void), io_sti(void), io_stihlt(void);
@@ -29,4 +31,5 @@ typedef struct KEYBUF {
 } KEYBUF;
 
 extern KEYBUF keybuf;
+extern FIFO8  keyfifo;
 #endif

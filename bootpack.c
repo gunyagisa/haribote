@@ -3,16 +3,18 @@
 #include "dsctbl.h"
 #include "interrupt.h"
 #include "mysprintf.c"
+#include "fifo.c"
 
 extern void sprintf(char *str, char *fmt, ...);
 
 void HariMain(void) {
 	BOOTINFO *binfo = (BOOTINFO *) ADDR_BOOTINFO;
-	char *mouse, *s;
+	char mouse[256], s[40], keybuf[32];
 	int mx, my, d;
 	mx = 100;
 	my = 100;
 
+	fifo8_init(&keyfifo, 32, keybuf);
 
 	init_gdtidt();
 	init_pic();
@@ -29,14 +31,10 @@ void HariMain(void) {
 	d = 0;
 	for (;;) {
 		io_cli();
-		if (keybuf.len == 0) {
+		if (fifo8_status(&keyfifo) == 0) {
 			io_stihlt();
 		} else {
-			d = keybuf.data[keybuf.next_r];
-			keybuf.next_r++;
-			keybuf.len--;
-			if (keybuf.next_r == 32)
-				keybuf.next_r = 0;
+			d = fifo8_get(&keyfifo);
 			io_sti();
 			sprintf(s, "%x", d);
 			boxfill8(binfo, COL8_008484, 0, 16, 15, 31);
