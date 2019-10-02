@@ -1,6 +1,5 @@
 #ifndef BOOTPACK_H_
 #define BOOTPACK_H_
-#include "interrupt.h"
 
 #define ADDR_BOOTINFO 	0x00000ff0
 
@@ -15,7 +14,6 @@ extern void load_idtr(int limit, int addr);
 extern void inthandler21_asm(void);
 extern void inthandler2c_asm(void);
 
-extern KEYBUF	keybuf;
 
 //struct to store the boot information written in asmhead.asm
 typedef struct BOOTINFO {
@@ -24,4 +22,11 @@ typedef struct BOOTINFO {
 	char *vram;
 } BOOTINFO;
 
+// key data stack
+typedef struct KEYBUF {
+	unsigned char data[32];
+	int next_r, next_w, len;
+} KEYBUF;
+
+extern KEYBUF keybuf;
 #endif

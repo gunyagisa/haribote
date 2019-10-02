@@ -1,10 +1,6 @@
 #ifndef INTERRUPT_H_
 #define INTERRUPT_H_
 
-typedef struct KEYBUF {
-	unsigned char data, flag;
-} KEYBUF;
-
 void init_pic(void);
 void inthandler21(int *esp);
 
