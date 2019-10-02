@@ -97,3 +97,7 @@ inthandler21_asm:
 	iretd
 
 inthandler2c_asm:
+	pushad
+	call 	inthandler2c
+	popad
+	iretd

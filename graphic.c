@@ -75,7 +75,7 @@ void boxfill8(BOOTINFO *binfo, unsigned char color_code, int x0, int y0, int x1,
 	}
 }
 
-void font_renderer8(BOOTINFO *binfo, int x, int y, char color_code, char *font) 
+void font_renderer8(BOOTINFO *binfo, char color_code, int x, int y,  char *font) 
 {
 	int i, j, xsize;
 	char *p, d , *vram;
@@ -94,11 +94,11 @@ void font_renderer8(BOOTINFO *binfo, int x, int y, char color_code, char *font)
 	}
 }
 
-void str_renderer8(BOOTINFO *binfo, int x, int y, char color_code, unsigned char *str)
+void str_renderer8(BOOTINFO *binfo, char color_code, int x, int y, unsigned char *str)
 {
 	extern char hankaku[4096];
 	for (;*str != 0x00;str++) {
-		font_renderer8(binfo, x, y, color_code, hankaku + *str * 16);
+		font_renderer8(binfo, color_code, x, y, hankaku + *str * 16);
 		x += 8;
 	}
 }

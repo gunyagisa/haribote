@@ -3,6 +3,7 @@
 
 void init_pic(void);
 void inthandler21(int *esp);
+void inthandler2c(int *esp);
 
 // PIC port number
 #define PIC0_ICW1		0x0020

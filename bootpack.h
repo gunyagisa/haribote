@@ -1,7 +1,7 @@
 #ifndef BOOTPACK_H_
 #define BOOTPACK_H_
 
-#define ADDR_BOOTINFO 	0x00000ff0
+#define BOOTINFO_ADDR 	0x00000ff0
 
 #include "fifo.h"
 

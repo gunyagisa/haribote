@@ -32,3 +32,10 @@ void inthandler21(int *esp)
 	data = io_in8(KEYDATA_PORT);
 	fifo8_put(&keyfifo, data);
 }
+
+void inthandler2c(int *esp)
+{
+	BOOTINFO *binfo = (BOOTINFO *) BOOTINFO_ADDR; 
+	boxfill8(binfo, COL8_000000, 0, 0, 32*8 - 1, 15);
+	str_renderer8(binfo, COL8_FFFFFF, 0, 0, "INT 2c (IRQ-12) PS/2 mouse");
+}
