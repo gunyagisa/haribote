@@ -22,8 +22,8 @@ void init_pic(void)
 	io_out8(PIC1_IMR, 0xff);
 }
 
-KEYBUF keybuf;
 FIFO8 keyfifo;
+FIFO8 mousefifo;
 
 void inthandler21(int *esp)
 {
@@ -35,7 +35,9 @@ void inthandler21(int *esp)
 
 void inthandler2c(int *esp)
 {
-	BOOTINFO *binfo = (BOOTINFO *) BOOTINFO_ADDR; 
-	boxfill8(binfo, COL8_000000, 0, 0, 32*8 - 1, 15);
-	str_renderer8(binfo, COL8_FFFFFF, 0, 0, "INT 2c (IRQ-12) PS/2 mouse");
+	unsigned char data;
+	io_out8(PIC1_OCW2, 0x64);
+	io_out8(PIC0_OCW2, 0x62);
+	data = io_in8(KEYDATA_PORT);
+	fifo8_put(&mousefifo, data);
 }

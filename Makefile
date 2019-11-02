@@ -23,7 +23,7 @@ geocide.img: ipl.bin geocide.sys Makefile
 
 
 run: geocide.img
-	qemu-system-i386 -fda geocide.img
+	qemu-system-i386 -m 32 -localtime -vga std -fda geocide.img
 	make clean
 
 clean:

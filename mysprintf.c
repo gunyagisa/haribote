@@ -1,5 +1,5 @@
 #include <stdarg.h>
-
+ 
 //10進数からASCIIコードに変換
 int dec2asc (char *str, int dec) {
     int len = 0, len_buf; //桁数
@@ -15,7 +15,7 @@ int dec2asc (char *str, int dec) {
     }
     return len_buf;
 }
-
+ 
 //16進数からASCIIコードに変換
 int hex2asc (char *str, int dec) { //10で割れた回数（つまり桁数）をlenに、各桁をbufに格納
     int len = 0, len_buf; //桁数
@@ -32,12 +32,12 @@ int hex2asc (char *str, int dec) { //10で割れた回数（つまり桁数）�
     }
     return len_buf;
 }
-
+ 
 void sprintf (char *str, char *fmt, ...) {
     va_list list;
     int i, len;
     va_start (list, 2);
-
+ 
     while (*fmt) {
         if(*fmt=='%') {
             fmt++;
@@ -52,7 +52,7 @@ void sprintf (char *str, char *fmt, ...) {
             str += len; fmt++;
         } else {
             *(str++) = *(fmt++);
-        }	
+        }   
     }
     *str = 0x00; //最後にNULLを追加
     va_end (list);

@@ -24,12 +24,6 @@ typedef struct BOOTINFO {
 	char *vram;
 } BOOTINFO;
 
-// key data stack
-typedef struct KEYBUF {
-	unsigned char data[32];
-	int next_r, next_w, len;
-} KEYBUF;
-
-extern KEYBUF keybuf;
 extern FIFO8  keyfifo;
+extern FIFO8  mousefifo;
 #endif
