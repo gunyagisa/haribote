@@ -80,7 +80,6 @@ int mouse_decode(struct MOUSE_DEC *mdec, unsigned char dat)
     return -1;
 }
 
-
 void HariMain(void) {
 	BOOTINFO *binfo = (BOOTINFO *) BOOTINFO_ADDR;
 	char *mouse, s[40], keybuf[32], mousebuf[128];

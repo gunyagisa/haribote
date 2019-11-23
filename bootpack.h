@@ -16,7 +16,6 @@ extern void load_idtr(int limit, int addr);
 extern void inthandler21_asm(void);
 extern void inthandler2c_asm(void);
 
-
 //struct to store the boot information written in asmhead.asm
 typedef struct BOOTINFO {
 	char cyls, leds, vmode, reserve;
