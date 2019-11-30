@@ -10,7 +10,7 @@ hankaku.o: hankaku.c Makefile
 nasmfunc.o: nasmfunc.asm Makefile
 	nasm -f elf32 -o nasmfunc.o nasmfunc.asm
 
-bootpack.bin: bootpack.o nasmfunc.o hankaku.o graphic.o dsctbl.o interrupt.o fifo.o har.ld Makefile
+bootpack.bin: bootpack.o nasmfunc.o hankaku.o graphic.o dsctbl.o interrupt.o fifo.o mouse.o keyboard.o har.ld Makefile
 	ld -m elf_i386  -e HariMain -o bootpack.bin *.o -T har.ld
 
 geocide.sys: asmhead.bin bootpack.bin Makefile 
