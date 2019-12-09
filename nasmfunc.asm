@@ -74,20 +74,27 @@ io_load_eflags: ;int io_load_eflags(void)
 
 io_store_eflags: ;void io_store_eflags(int eflags)
 	mov		eax, [esp+4]
-	push	eax
+	push	        eax
 	popfd			;pop eflags
 	ret
+
+load_cr0: ; void load_cr0(void)
+        mov             eax, cr0
+        ret
+
+store_cr0: ; void store_cr0(int cr0)
+        mov             eax, [esp+4]
 
 load_gdtr: ;void load_gdt(int limit, int addr)
 	mov		ax, [esp+4]
 	mov		[esp+6], ax
-	lgdt	[esp+6]
+	lgdt	        [esp+6]
 	ret
 
 load_idtr:
 	mov		ax, [esp+4]
 	mov		[esp+6], ax
-	lidt	[esp+6]
+	lidt	        [esp+6]
 	ret
 
 inthandler21_asm:
