@@ -7,6 +7,8 @@
 #include "keyboard.h"
 #include "mysprintf.c"
 
+unsigned int memtest_sub(unsigned int start, unsigned int end);
+
 unsigned int memtest(unsigned int start, unsigned int end)
 {
     char flg486 = 0;
@@ -22,7 +24,7 @@ unsigned int memtest(unsigned int start, unsigned int end)
     }
 
     eflg &= ~EFLAGS_AC_BIT;
-    io_store_eflags();
+    io_store_eflags(eflg);
 
     if (flg486 != 0) {
         cr0 = load_cr0();
@@ -33,7 +35,7 @@ unsigned int memtest(unsigned int start, unsigned int end)
     i = memtest_sub(start, end);
 
     if (flg486 != 0) {
-        cr0 = load_cr0;
+        cr0 = load_cr0();
         cr0 &= ~CR0_CACHE_DISABLE;
         store_cr0(cr0);
     }
@@ -41,14 +43,42 @@ unsigned int memtest(unsigned int start, unsigned int end)
     return i;
 }
 
+unsigned int memtest_sub(unsigned int start, unsigned int end)
+{
+    unsigned int i, *p, old, pat0 = 0xaa55aa55, pat1 = 0x55aa55aa;
+    for (i = start;i <= end;i += 0x1000) {
+        p = (unsigned int *) (i + 0xffc);
+        old = *p;
+        *p = pat0;
+        *p ^= 0xffffffff;
+        if (*p != pat1) {
+not_memory:
+            *p = old;
+            break;
+        }
 
-void HariMain(void) {
+        *p ^= 0xffffffff;
+        if (*p != pat0) {
+            goto not_memory;
+        }
+
+        *p = old;
+    }
+    return i;
+}
+
+
+
+void HariMain(void) 
+{
     BOOTINFO *binfo = (BOOTINFO *) BOOTINFO_ADDR;
     char *mouse, s[40], keybuf[32], mousebuf[128];
     int mx, my, d;
     struct MOUSE_DEC mdec;
     mx = 100;
     my = 100;
+
+    unsigned int i = memtest(0x00400000, 0xbfffffff) / (1024 * 1024);
 
     init_gdtidt();
     init_pic();
@@ -62,6 +92,9 @@ void HariMain(void) {
 
     init_palette();	//configure color setting
     init_screen(binfo);
+    sprintf(s, "Memory Size: %d", i);
+    str_renderer8(binfo, COL8_FFFFFF, 0, 32, s);
+
     init_mouse_cursor8(mouse, COL8_008484);
     block_renderer8(binfo->vram, binfo->scrnx, 16, 16, mx, my, mouse, 16);
 
@@ -101,7 +134,7 @@ void HariMain(void) {
                     if (my > binfo->scrny - 16)
                         my = binfo->scrny - 16;
 
-                    sprintf(s, "(%d   , %d)", my, my);
+                    sprintf(s, "(%d   , %d)", mx, my);
                     boxfill8(binfo, COL8_008484, 0, 0, 79, 15);
                     str_renderer8(binfo, COL8_FFFFFF, 0, 0, s);
                     block_renderer8(binfo->vram, binfo->scrnx, 16, 16, mx, my, mouse, 16);
