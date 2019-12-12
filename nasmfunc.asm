@@ -4,7 +4,7 @@ bits 32
 
 global	io_hlt , io_cli, io_sti, io_stihlt
 global 	io_out8 ,io_out16, io_out32, io_in8, io_in16, io_in32
-global	io_store_eflags ,io_load_eflags
+global	io_store_eflags ,io_load_eflags, store_cr0, load_cr0
 global	load_gdtr, load_idtr
 global  inthandler21_asm, inthandler2c_asm
 
@@ -84,6 +84,8 @@ load_cr0: ; void load_cr0(void)
 
 store_cr0: ; void store_cr0(int cr0)
         mov             eax, [esp+4]
+        mov             cr0, eax
+        ret
 
 load_gdtr: ;void load_gdt(int limit, int addr)
 	mov		ax, [esp+4]
