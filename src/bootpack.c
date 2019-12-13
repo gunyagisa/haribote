@@ -5,7 +5,7 @@
 #include "fifo.h"
 #include "mouse.h"
 #include "keyboard.h"
-#include "mysprintf.c"
+#include "mysprintf.h"
 
 unsigned int memtest_sub(unsigned int start, unsigned int end);
 
