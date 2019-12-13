@@ -1,14 +1,14 @@
 %.bin: %.asm Makefile
-	nasm -o $*.bin $*.asm
+	nasm -o $@ $<
 
 %.o: %.c %.h Makefile
-	gcc -c -m32 -fno-pic -fno-stack-protector -o $*.o $*.c
+	gcc -c -m32 -fno-pic -fno-stack-protector -o $@ $<
 
 hankaku.o: hankaku.c Makefile
-	gcc -c -m32 hankaku.c -o hankaku.o
+	gcc -c -m32 -o $@ $<
 
 nasmfunc.o: nasmfunc.asm Makefile
-	nasm -f elf32 -o nasmfunc.o nasmfunc.asm
+	nasm -f elf32 -o $@ $<
 
 bootpack.bin: bootpack.o nasmfunc.o hankaku.o graphic.o dsctbl.o interrupt.o fifo.o mouse.o keyboard.o har.ld Makefile
 	ld -m elf_i386  -e HariMain -o bootpack.bin *.o -T har.ld
@@ -27,4 +27,6 @@ run: geocide.img
 	make clean
 
 clean:
-	rm *.bin *.o geocide.*
+	rm -f *.bin *.o geocide.*
+
+.PHONY: clean
