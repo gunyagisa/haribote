@@ -92,7 +92,7 @@ void HariMain(void)
 
     init_palette();	//configure color setting
     init_screen(binfo);
-    sprintf(s, "Memory Size: %d", i);
+    sprintf(s, "Memory Size: %dM", i);
     str_renderer8(binfo, COL8_FFFFFF, 0, 32, s);
 
     init_mouse_cursor8(mouse, COL8_008484);
