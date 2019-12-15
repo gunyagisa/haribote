@@ -12,8 +12,7 @@ unsigned int memtest_sub(unsigned int start, unsigned int end);
 unsigned int memtest(unsigned int start, unsigned int end)
 {
     char flg486 = 0;
-    unsigned int eflg, cr0, i;
-
+    unsigned int eflg, cr0, i; 
     // check 386 or 486 later
     eflg = io_load_eflags();
     eflg |= EFLAGS_AC_BIT;
