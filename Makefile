@@ -28,9 +28,9 @@ $(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys Makefile
 
 run: $(BUILD)geocide.img
 	qemu-system-i386 -m 32 -vga std -fda $< -show-cursor -monitor stdio
-	make clean
 
 clean:
 	rm -f $(BUILD)*.bin $(BUILD)*.o $(BUILD)geocide.*
 
 .PHONY: clean
+.SILENT:
