@@ -1,5 +1,4 @@
-#ifndef BOOTPACK_H_
-#define BOOTPACK_H_
+#pragma once
 
 #define BOOTINFO_ADDR 	0x00000ff0
 
@@ -30,4 +29,3 @@ typedef struct BOOTINFO {
 
 extern FIFO8  keyfifo;
 extern FIFO8  mousefifo;
-#endif

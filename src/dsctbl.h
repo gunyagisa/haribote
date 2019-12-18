@@ -1,6 +1,4 @@
-#ifndef DSCTBL_H_
-#define DSCTBL_H_
-
+#pragma once
 
 // access right
 #define AR_INTGATE32		0x008e
@@ -27,4 +25,3 @@ typedef struct GATE_DISCRIPTOR {
 void init_gdtidt(void);
 void set_sgmntdsc(SEGMENT_DISCRIPTOR *sd, unsigned int limit, int base, int access_right);
 void set_gatedsc(GATE_DISCRIPTOR *gd, int offset, int selector, int access_right);
-#endif

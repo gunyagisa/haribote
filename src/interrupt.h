@@ -1,5 +1,4 @@
-#ifndef INTERRUPT_H_
-#define INTERRUPT_H_
+#pragma once
 
 void init_pic(void);
 void inthandler21(int *esp);
@@ -21,4 +20,3 @@ void inthandler2c(int *esp);
 
 //
 #define KEYDATA_PORT		0x0060
-#endif

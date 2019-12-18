@@ -1,5 +1,4 @@
-#ifndef KEYBOARD_H_
-#define KEYBOARD_H_
+#pragma once
 
 #define PORT_KEYCMD		0x0064
 #define PORT_KEYDATA		0x0060
@@ -9,5 +8,3 @@
 
 void wait_KBC_sendready(void);
 void init_keyboard(void);
-
-#endif

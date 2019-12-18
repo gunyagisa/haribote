@@ -1,5 +1,4 @@
-#ifndef MEMORY_H_
-#define MEMORY_H_
+#pragma once
 
 #define MEMMAN_FREES    4096  // about 32KB
 
@@ -20,5 +19,3 @@ unsigned int memman_alloc(struct MEMMAN *man, unsigned int size);
 int memman_free(struct MEMMAN *man, unsigned int addr, unsigned int size);
 int memman_free_4k(struct MEMMAN *man, unsigned int addr, unsigned int size);
 unsigned int memman_alloc_4k(struct MEMMAN *man, unsigned int size);
-
-#endif

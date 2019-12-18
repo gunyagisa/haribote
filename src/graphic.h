@@ -1,6 +1,5 @@
 // graphic.h
-#ifndef	GRAPHIC_H_
-#define GRAPHIC_H_
+#pragma once
 
 #include "bootpack.h"
 
@@ -30,5 +29,3 @@ void init_mouse_cursor8(char *mouse, char back_color);
 #define COL8_840084		13
 #define COL8_008484		14
 #define COL8_848484		15
-
-#endif
