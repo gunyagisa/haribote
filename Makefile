@@ -1,4 +1,4 @@
-OBJ := bootpack.o dsctbl.o fifo.o graphic.o hankaku.o interrupt.o keyboard.o mouse.o nasmfunc.o memory.o
+OBJ := bootpack.o dsctbl.o fifo.o graphic.o hankaku.o interrupt.o keyboard.o mouse.o nasmfunc.o memory.o sheet.o
 BUILD := ./build-cache/
 SRC := ./src/
 
