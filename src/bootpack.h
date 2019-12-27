@@ -19,6 +19,9 @@ extern void load_gdtr(int limit, int addr);
 extern void load_idtr(int limit, int addr);
 extern void inthandler21_asm(void);
 extern void inthandler2c_asm(void);
+extern void inthandler20_asm(void);
+
+extern void init_pit(void);
 
 //struct to store the boot information written in asmhead.asm
 typedef struct BOOTINFO {
@@ -29,3 +32,8 @@ typedef struct BOOTINFO {
 
 extern FIFO8  keyfifo;
 extern FIFO8  mousefifo;
+
+struct TIMERCTL {
+    unsigned int count;
+};
+extern struct TIMERCTL timer;

@@ -14,12 +14,7 @@ void make_window8(unsigned char *buf, int xsize, int ysize, char *title)
     static char closebtn[14][16] = {
         "00000000000000$@",
         "0QQQQQQQQQQQQQ$@",
-        "0QQQQQQQQQQQQQ$@",
-        "0QQQ@@QQQQ@@QQ$@",
-        "0QQQQ@@QQ@@QQQ$@",
-        "0QQQQQ@@@@QQQQ$@",
-        "0QQQQQQ@@QQQQQ$@",
-        "0QQQQQ@@@@QQQQ$@",
+        "0QQQQQQQQQQQQQ$@", "0QQQ@@QQQQ@@QQ$@", "0QQQQ@@QQ@@QQQ$@", "0QQQQQ@@@@QQQQ$@", "0QQQQQQ@@QQQQQ$@", "0QQQQQ@@@@QQQQ$@",
         "0QQQQ@@QQ@@QQQ$@",
         "0QQQ@@QQQQ@@QQ$@",
         "0QQQQQQQQQQQQQ$@",
@@ -80,12 +75,14 @@ void HariMain(void)
     memman_free(memman, 0x00001000, 0x0009e000);
     memman_free(memman, 0x00400000, memtotal - 0x00400000);
 
+    io_cli();
     init_gdtidt();
     init_pic();
     io_sti();
     fifo8_init(&keyfifo, 32, keybuf);
     fifo8_init(&mousefifo, 128, mousebuf);
-    io_out8(PIC0_IMR, 0xf9);
+    init_pit();
+    io_out8(PIC0_IMR, 0xf8);
     io_out8(PIC1_IMR, 0xef);
 
     init_keyboard();
@@ -124,8 +121,7 @@ void HariMain(void)
     enable_mouse(&mdec);
 
     for (;;) {
-        counter++;
-        sprintf(s, "%d", counter);
+        sprintf(s, "%d", timer.count);
         boxfill8(buf_win, 160, COL8_C6C6C6, 40, 28, 119, 43);
         str_renderer8(buf_win, 160, COL8_000000, 40, 28, s);
         sheet_refresh(sht_win, 40, 28, 120, 44);

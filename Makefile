@@ -1,4 +1,4 @@
-OBJ := bootpack.o dsctbl.o fifo.o graphic.o hankaku.o interrupt.o keyboard.o mouse.o nasmfunc.o memory.o sheet.o
+OBJ := bootpack.o dsctbl.o fifo.o graphic.o hankaku.o interrupt.o keyboard.o mouse.o nasmfunc.o memory.o sheet.o timer.o
 BUILD := ./build-cache/
 SRC := ./src/
 
@@ -6,6 +6,9 @@ $(BUILD)%.bin: $(SRC)%.asm Makefile
 	nasm -o $@ $<
 
 $(BUILD)%.o: $(SRC)%.c $(SRC)%.h Makefile
+	gcc -c -m32 -fno-pic -fno-stack-protector -o $@ $<
+
+$(BUILD)%.o: $(SRC)%.c Makefile
 	gcc -c -m32 -fno-pic -fno-stack-protector -o $@ $<
 
 $(BUILD)hankaku.o: $(SRC)hankaku.c Makefile
