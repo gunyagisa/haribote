@@ -94,9 +94,9 @@ void HariMain(void)
                         my = binfo->scrny - 16;
 
                     sprintf(s, "(%d   , %d)", mx, my);
-                    boxfill8(buf_back, binfo->scrnx, COL8_008484, 0, 0, 150, 15);
+                    boxfill8(buf_back, binfo->scrnx, COL8_008484, 0, 0, 100, 15);
                     str_renderer8(buf_back, binfo->scrnx, COL8_FFFFFF, 0, 0, s);
-                    sheet_refresh(shtctl ,sht_back, 0, 0, 80, 16);
+                    sheet_refresh(shtctl ,sht_back, 0, 0, 101, 16);
                     sheet_slide(shtctl, sht_mouse, mx, my);
                 }
             } else if (fifo8_status(&keyfifo) != 0) {
