@@ -71,7 +71,7 @@ void HariMain(void)
     struct SHEET *sht_back, *sht_mouse, *sht_win;
     unsigned char *buf_back, buf_mouse[256], *buf_win;
 
-    unsigned int memtotal;
+    unsigned int memtotal, counter = 0;
     mx = (binfo->scrnx - 16) / 2;
     my = (binfo->scrny - 28 - 16) / 2;
 
@@ -98,16 +98,14 @@ void HariMain(void)
     sht_win = sheet_alloc(shtctl);
 
     buf_back = (unsigned char *) memman_alloc_4k(memman, binfo->scrnx * binfo->scrny);
-    buf_win = (unsigned char *) memman_alloc_4k(memman, 160 * 68);
+    buf_win = (unsigned char *) memman_alloc_4k(memman, 160 * 52);
 
     sheet_setbuf(sht_back, buf_back, binfo->scrnx, binfo->scrny, -1);
     sheet_setbuf(sht_mouse, buf_mouse, 16, 16, 99);
-    sheet_setbuf(sht_win, buf_win, 160, 68, -1);
+    sheet_setbuf(sht_win, buf_win, 160, 52, -1);
     init_screen(buf_back, binfo->scrnx, binfo->scrny);
     init_mouse_cursor8(buf_mouse, 99);
-    make_window8(buf_win, 160, 68, "window");
-    str_renderer8(buf_win, 160, COL8_000000, 24, 28, "Welcome to");
-    str_renderer8(buf_win, 160, COL8_000000, 24, 44, "  Haribote-OS!");
+    make_window8(buf_win, 160, 52, "window");
 
     sheet_slide(sht_back, 0, 0);
     sheet_slide(sht_mouse, mx, my);
@@ -126,9 +124,14 @@ void HariMain(void)
     enable_mouse(&mdec);
 
     for (;;) {
+        counter++;
+        sprintf(s, "%d", counter);
+        boxfill8(buf_win, 160, COL8_C6C6C6, 40, 28, 119, 43);
+        str_renderer8(buf_win, 160, COL8_000000, 40, 28, s);
+        sheet_refresh(sht_win, 40, 28, 120, 44);
         io_cli();
         if (fifo8_status(&keyfifo) + fifo8_status(&mousefifo) == 0) {
-            io_stihlt();
+            io_sti();
         } else {
             if (fifo8_status(&mousefifo) != 0) {
                 d = fifo8_get(&mousefifo);
