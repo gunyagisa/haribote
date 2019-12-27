@@ -72,7 +72,7 @@ void sheet_updown(struct SHEET *sht, int height)
             }
             ctl->top--;
         }
-        sheet_refresh(sht, sht->vx0, sht->vy0, sht->vx0 + sht->bxsize, sht->vy0 + sht->bysize);
+        sheet_refreshsub(ctl, sht->vx0, sht->vy0, sht->vx0 + sht->bxsize, sht->vy0 + sht->bysize);
     } else if (old < height) {
         if (old >= 0) {
             for (int h = 0;h < height;++h) {
@@ -88,7 +88,7 @@ void sheet_updown(struct SHEET *sht, int height)
             ctl->sheets[height] = sht;
             ctl->top++;
         }
-        sheet_refresh(sht, sht->vx0, sht->vy0, sht->vx0 + sht->bxsize, sht->vy0 + sht->bysize);
+        sheet_refreshsub(ctl, sht->vx0, sht->vy0, sht->vx0 + sht->bxsize, sht->vy0 + sht->bysize);
     }
 }
 
