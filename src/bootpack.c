@@ -5,7 +5,7 @@
 #include "fifo.h"
 #include "mouse.h"
 #include "keyboard.h"
-#include "mysprintf.h"
+#include "mysprintf.h" 
 #include "memory.h"
 #include "sheet.h"
 
@@ -48,7 +48,7 @@ void HariMain(void)
     sheet_setbuf(sht_back, buf_back, binfo->scrnx, binfo->scrny, -1);
     sheet_setbuf(sht_mouse, buf_mouse, 16, 16, 99);
     init_screen(buf_back, binfo->scrnx, binfo->scrny);
-    init_mouse_cursor8(buf_mouse, COL8_008484);
+    init_mouse_cursor8(buf_mouse, 99);
     sheet_slide(shtctl, sht_back, 0, 0);
     sheet_slide(shtctl, sht_mouse, mx, my);
     sheet_updown(shtctl, sht_back, 0);
@@ -94,7 +94,7 @@ void HariMain(void)
                         my = binfo->scrny - 16;
 
                     sprintf(s, "(%d   , %d)", mx, my);
-                    boxfill8(buf_back, binfo->scrnx, COL8_008484, 0, 0, 79, 15);
+                    boxfill8(buf_back, binfo->scrnx, COL8_008484, 0, 0, 150, 15);
                     str_renderer8(buf_back, binfo->scrnx, COL8_FFFFFF, 0, 0, s);
                     sheet_slide(shtctl, sht_mouse, mx, my);
                 }
