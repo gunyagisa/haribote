@@ -7,6 +7,8 @@
 
 #define MEMMAN_ADDR     0x003c0000
 
+#define MAX_TIMER       500
+
 #include "fifo.h"
 
 // nasmfunc.asm
@@ -21,8 +23,6 @@ extern void inthandler21_asm(void);
 extern void inthandler2c_asm(void);
 extern void inthandler20_asm(void);
 
-extern void init_pit(void);
-
 //struct to store the boot information written in asmhead.asm
 typedef struct BOOTINFO {
 	char cyls, leds, vmode, reserve;
@@ -33,7 +33,20 @@ typedef struct BOOTINFO {
 extern FIFO8  keyfifo;
 extern FIFO8  mousefifo;
 
-struct TIMERCTL {
-    unsigned int count;
+
+struct TIMER {
+    unsigned int timeout, flags;
+    FIFO8 *fifo;
+    unsigned char data;
 };
-extern struct TIMERCTL timer;
+
+struct TIMERCTL {
+    unsigned int count, next;
+    struct TIMER timer[MAX_TIMER];
+};
+extern struct TIMERCTL timectl;
+
+extern void init_pit(void);
+extern void settimer(struct TIMER *timer, unsigned int timeout);
+extern struct TIMER *timer_alloc(void);
+extern void timer_init(struct TIMER *timer, FIFO8 *fifo, unsigned char data);
