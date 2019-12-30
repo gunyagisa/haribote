@@ -1,7 +1,6 @@
 #pragma once
 
 void init_pic(void);
-void inthandler21(int *esp);
 void inthandler2c(int *esp);
 
 // PIC port number

@@ -53,19 +53,25 @@ void make_window8(unsigned char *buf, int xsize, int ysize, char *title)
 }
     
     
-    
+void str_renderer_sht(struct SHEET *sht, int x, int y, int c, int b, char *s, int l)
+{
+    boxfill8(sht->buf, sht->bxsize, b, x, y, x + l * 8, y + 15);
+    str_renderer8(sht->buf, sht->bxsize, c, x, y, s);
+    sheet_refresh(sht, x, y, x + l * 8, y + 16);
+}
 
 void HariMain(void) 
 {
     BOOTINFO *binfo = (BOOTINFO *) BOOTINFO_ADDR;
-    char s[40], keybuf[32], mousebuf[128], timerbuf1[8], timerbuf2[8], timerbuf3[8];
+    char s[40];
+    FIFO32 fifo;
+    int fifobuf[128];
     int mx, my, d;
     struct MOUSE_DEC mdec;
     struct MEMMAN *memman = (struct MEMMAN *) MEMMAN_ADDR;
     struct SHTCTL *shtctl;
     struct SHEET *sht_back, *sht_mouse, *sht_win;
     unsigned char *buf_back, buf_mouse[256], *buf_win;
-    FIFO8 timerfifo1, timerfifo2, timerfifo3;
     struct TIMER *timer1, *timer2, *timer3;
 
     unsigned int memtotal, counter = 0;
@@ -81,28 +87,25 @@ void HariMain(void)
     init_gdtidt();
     init_pic();
     io_sti();
-    fifo8_init(&keyfifo, 32, keybuf);
-    fifo8_init(&mousefifo, 128, mousebuf);
+    fifo32_init(&fifo, 128, fifobuf);
     
-    // timer setting
     init_pit();         // PIT configure
-    fifo8_init(&timerfifo1, 8, timerbuf1);
-    timer1 = timer_alloc();
-    timer_init(timer1, &timerfifo1, 1);
-    settimer(timer1, 1000);
-    fifo8_init(&timerfifo2, 8, timerbuf2);
-    timer2 = timer_alloc();
-    timer_init(timer2, &timerfifo2, 1);
-    settimer(timer2, 500);
-    fifo8_init(&timerfifo3, 8, timerbuf3);
-    timer3 = timer_alloc();
-    timer_init(timer3, &timerfifo3, 1);
-    settimer(timer3, 50);
+
+    init_keyboard(&fifo, 256);
+    enable_mouse(&fifo, 512, &mdec);
 
     io_out8(PIC0_IMR, 0xf8);
     io_out8(PIC1_IMR, 0xef);
 
-    init_keyboard();
+    timer1 = timer_alloc();
+    timer_init(timer1, &fifo, 10);
+    settimer(timer1, 1000);
+    timer2 = timer_alloc();
+    timer_init(timer2, &fifo, 3);
+    settimer(timer2, 300);
+    timer3 = timer_alloc();
+    timer_init(timer3, &fifo, 1);
+    settimer(timer3, 50);
 
     init_palette();	//configure color setting
 
@@ -129,38 +132,33 @@ void HariMain(void)
     sheet_updown(sht_mouse, 2);
     sheet_updown(sht_win, 1);
 
-    sprintf(s, "(%d   , %d)", mx, my);
+    sprintf(s, "(%d, %d)", mx, my);
     str_renderer8(buf_back, binfo->scrnx, COL8_FFFFFF, 0, 0, s);
     sprintf(s, "Memory Size: %dMB  free: %dKB", memtotal / (1024 * 1024), memman_total(memman) / 1024);
     str_renderer8(buf_back, binfo->scrnx, COL8_FFFFFF, 0, 32, s);
     sheet_refresh(sht_back, 0, 0, binfo->scrnx, 48);
 
-    enable_mouse(&mdec);
 
     for (;;) {
-        sprintf(s, "%d", timectl.count);
-        boxfill8(buf_win, 160, COL8_C6C6C6, 40, 28, 119, 43);
-        str_renderer8(buf_win, 160, COL8_000000, 40, 28, s);
-        sheet_refresh(sht_win, 40, 28, 120, 44);
+        counter++;
         io_cli();
-        if (fifo8_status(&keyfifo) + fifo8_status(&mousefifo) + fifo8_status(&timerfifo1)
-                + fifo8_status(&timerfifo2) + fifo8_status(&timerfifo3) == 0) {
+        if (fifo32_status(&fifo) == 0) {
             io_sti();
         } else {
-            if (fifo8_status(&mousefifo) != 0) {
-                d = fifo8_get(&mousefifo);
-                io_sti();
-                if (mouse_decode(&mdec, d) != 0) {
-                    sprintf(s, "[lcr %d   %d]", mdec.x, mdec.y);
+            d = fifo32_get(&fifo);
+            if (256 <= d && d <= 511) { //keyboard
+                sprintf(s, "%x", d - 256);
+                str_renderer_sht(sht_back, 0, 16, COL8_FFFFFF, COL8_008484, s, 2);
+            } else if (512 <= d && d <= 767) { //mouse
+                if (mouse_decode(&mdec, d - 512) != 0) {
+                    sprintf(s, "[lcr %d %d]", mdec.x, mdec.y);
                     if ((mdec.btn & 0x01) != 0)
                         s[1] = 'L';
                     if ((mdec.btn & 0x02) != 0)
                         s[3] = 'R';
                     if ((mdec.btn & 0x04) != 0)
                         s[2] = 'C';
-                    boxfill8(buf_back,binfo->scrnx, COL8_008484, 32, 16, 32 + 8 * 15 - 1, 31);
-                    str_renderer8(buf_back, binfo->scrnx, COL8_FFFFFF, 32, 16, s);
-                    sheet_refresh(sht_back, 32, 16, 32 + 8 * 15, 32);
+                    str_renderer_sht(sht_back, 32, 16, COL8_FFFFFF, COL8_008484, s, 15);
 
                     mx += mdec.x;
                     my += mdec.y;
@@ -174,37 +172,23 @@ void HariMain(void)
                     if (my > binfo->scrny - 1)
                         my = binfo->scrny - 1;
 
-                    sprintf(s, "(%d   , %d)", mx, my);
-                    boxfill8(buf_back, binfo->scrnx, COL8_008484, 0, 0, 100, 15);
-                    str_renderer8(buf_back, binfo->scrnx, COL8_FFFFFF, 0, 0, s);
-                    sheet_refresh(sht_back, 0, 0, 101, 16);
+                    sprintf(s, "(%d, %d)", mx, my);
+                    str_renderer_sht(sht_back, 0, 0, COL8_FFFFFF, COL8_008484, s, 10);
                     sheet_slide(sht_mouse, mx, my);
                 }
-            } else if (fifo8_status(&keyfifo) != 0) {
-                d = fifo8_get(&keyfifo);
-                io_sti();
-                sprintf(s, "%x", d);
-                boxfill8(buf_back, binfo->scrnx, COL8_008484, 0, 16, 15, 31);
-                str_renderer8(buf_back, binfo->scrnx, COL8_FFFFFF, 0, 16, s); 
-                sheet_refresh(sht_back, 0, 16, 16, 32);
-            } else if (fifo8_status(&timerfifo1) != 0) {
-                d = fifo8_get(&timerfifo1);
-                io_sti();
-                str_renderer8(buf_back, binfo->scrnx, COL8_FFFFFF, 0, 64, "10[sec]");
-                sheet_refresh(sht_back, 0, 64, 56, 80);
-            } else if (fifo8_status(&timerfifo2) != 0) {
-                d = fifo8_get(&timerfifo2);
-                io_sti();
-                str_renderer8(buf_back, binfo->scrnx, COL8_FFFFFF, 0, 80, "5[sec]");
-                sheet_refresh(sht_back, 0, 80, 48, 96);
-            }else if (fifo8_status(&timerfifo3) != 0) {
-                d = fifo8_get(&timerfifo3);
-                io_sti();
+            } else if (d == 10) {
+                str_renderer_sht(sht_back, 0, 64, COL8_FFFFFF, COL8_008484, "10[sec]", 7);
+                sprintf(s, "%d", counter);
+                str_renderer_sht(sht_win, 40, 28, COL8_000000, COL8_C6C6C6, s, 10);
+            } else if (d == 3) {
+                str_renderer_sht(sht_back, 0, 80, COL8_FFFFFF, COL8_008484, "3[sec]", 6);
+                counter = 0;
+            } else {
                 if (d != 0) {
-                    timer_init(timer3, &timerfifo3, 0);
+                    timer_init(timer3, &fifo, 0);
                     boxfill8(buf_back, binfo->scrnx, COL8_FFFFFF, 8, 96, 15, 111);
                 } else {
-                    timer_init(timer3, &timerfifo3, 1);
+                    timer_init(timer3, &fifo, 1);
                     boxfill8(buf_back, binfo->scrnx, COL8_008484, 8, 96, 15, 111);
                 }
                 settimer(timer3, 50);

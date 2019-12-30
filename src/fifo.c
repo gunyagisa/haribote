@@ -2,7 +2,7 @@
 
 #define FLAGS_OVERRUN 0x0001
 
-void fifo8_init(FIFO8 *fifo, int size, unsigned char *buf)
+void fifo32_init(FIFO32 *fifo, int size, int *buf)
 {
 	fifo->buf = buf;
 	fifo->size = size;
@@ -12,7 +12,7 @@ void fifo8_init(FIFO8 *fifo, int size, unsigned char *buf)
 	fifo->next_w = 0;
 }
 
-int fifo8_put(FIFO8 *fifo, unsigned char data)
+int fifo32_put(FIFO32 *fifo, int data)
 {
 	if (fifo->free == 0) {
 		fifo->flags |= FLAGS_OVERRUN;
@@ -26,7 +26,7 @@ int fifo8_put(FIFO8 *fifo, unsigned char data)
 	return 0;
 }
 
-int fifo8_get(FIFO8 *fifo)
+int fifo32_get(FIFO32 *fifo)
 {
 	if (fifo->free == fifo->size)
 		return -1;
@@ -41,7 +41,7 @@ int fifo8_get(FIFO8 *fifo)
 	return data;
 }
 
-int fifo8_status(FIFO8 *fifo)
+int fifo32_status(FIFO32 *fifo)
 {
 	return fifo->size - fifo->free;
 }

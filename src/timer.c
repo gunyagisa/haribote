@@ -38,7 +38,7 @@ void timer_free(struct TIMER *timer)
     timer->flags = 0;
 }
 
-void timer_init(struct TIMER *timer, FIFO8 *fifo, unsigned char data)
+void timer_init(struct TIMER *timer, FIFO32 *fifo, int data)
 {
     timer->fifo = fifo;
     timer->data = data;
@@ -54,7 +54,7 @@ void inthandler20(int *esp)
     for (i = 0;i < timectl.using;++i) {
         if (timectl.timers[i]->timeout > timectl.count) break;
         timectl.timers[i]->flags = TIMER_FLAGS_ALLOC;
-        fifo8_put(timectl.timers[i]->fifo, timectl.timers[i]->data);
+        fifo32_put(timectl.timers[i]->fifo, timectl.timers[i]->data);
     }
     timectl.using -= i;
     for (int j = 0;j < timectl.using;++j) {

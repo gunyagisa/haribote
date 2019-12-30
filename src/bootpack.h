@@ -30,13 +30,9 @@ typedef struct BOOTINFO {
 	char *vram;
 } BOOTINFO;
 
-extern FIFO8  keyfifo;
-extern FIFO8  mousefifo;
-
-
 struct TIMER {
     unsigned int timeout, flags;
-    FIFO8 *fifo;
+    FIFO32 *fifo;
     unsigned char data;
 };
 
@@ -50,4 +46,4 @@ extern struct TIMERCTL timectl;
 extern void init_pit(void);
 extern void settimer(struct TIMER *timer, unsigned int timeout);
 extern struct TIMER *timer_alloc(void);
-extern void timer_init(struct TIMER *timer, FIFO8 *fifo, unsigned char data);
+extern void timer_init(struct TIMER *timer, FIFO32 *fifo, int data);
