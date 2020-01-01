@@ -1,6 +1,8 @@
-OBJ := bootpack.o dsctbl.o fifo.o graphic.o hankaku.o interrupt.o keyboard.o mouse.o nasmfunc.o memory.o sheet.o timer.o
-BUILD := ./build-cache/
-SRC := ./src/
+OBJ = bootpack.o dsctbl.o fifo.o graphic.o hankaku.o interrupt.o keyboard.o mouse.o nasmfunc.o memory.o sheet.o timer.o
+BUILD = ./build-cache/
+SRC = ./src/
+
+QEMU = qemu-system-i386
 
 $(BUILD)%.bin: $(SRC)%.asm Makefile
 	nasm -o $@ $<
@@ -18,7 +20,7 @@ $(BUILD)nasmfunc.o: $(SRC)nasmfunc.asm Makefile
 	nasm -f elf32 -o $@ $<
 
 $(BUILD)bootpack.bin: $(addprefix $(BUILD), $(OBJ)) Makefile
-	ld -m elf_i386  -e HariMain -o $(BUILD)bootpack.bin $(BUILD)*.o -T har.ld
+	ld -m elf_i386  -e HariMain -o $(BUILD)bootpack.bin $(addprefix $(BUILD), $(OBJ)) -T har.ld
 
 $(BUILD)geocide.sys: $(BUILD)asmhead.bin $(BUILD)bootpack.bin Makefile 
 	cat $< $(BUILD)bootpack.bin > $@
@@ -28,9 +30,8 @@ $(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys Makefile
 	mcopy $(BUILD)geocide.sys -i $@ ::
 
 
-
 run: $(BUILD)geocide.img
-	qemu-system-i386 -m 32 -vga std -fda $< -show-cursor -monitor stdio
+	$(QEMU) -m 32 -vga std -fda $< -show-cursor -monitor stdio
 
 clean:
 	rm -f $(BUILD)*.bin $(BUILD)*.o $(BUILD)geocide.*

@@ -179,7 +179,7 @@ void HariMain(void)
             } else if (d == 10) {
                 str_renderer_sht(sht_back, 0, 64, COL8_FFFFFF, COL8_008484, "10[sec]", 7);
                 sprintf(s, "%d", counter);
-                str_renderer_sht(sht_win, 40, 28, COL8_000000, COL8_C6C6C6, s, 10);
+                str_renderer_sht(sht_win, 40, 28, COL8_000000, COL8_C6C6C6, s, 15);
             } else if (d == 3) {
                 str_renderer_sht(sht_back, 0, 80, COL8_FFFFFF, COL8_008484, "3[sec]", 6);
                 counter = 0;
