@@ -62,6 +62,13 @@ void str_renderer_sht(struct SHEET *sht, int x, int y, int c, int b, char *s, in
 
 void HariMain(void) 
 {
+  static char keytable[0x54] = {
+    0, 0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '^', 0, 0,
+    'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '@', '[', 0, 0,'A', 'S',
+    'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', ':', 0, 0, ']', 'Z', 'X', 'C', 'V',
+    'B', 'N', 'M', ',', '.', '/', 0, '*', 0, ' ', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, '7', '8', '9', '-', '4', '5', '6', '+', '1', '2', '3', '0', '.'};
+
   BOOTINFO *binfo = (BOOTINFO *) BOOTINFO_ADDR;
   char s[40];
   FIFO32 fifo;
@@ -148,6 +155,13 @@ void HariMain(void)
       if (256 <= d && d <= 511) { //keyboard
         sprintf(s, "%x", d - 256);
         str_renderer_sht(sht_back, 0, 16, COL8_FFFFFF, COL8_008484, s, 2);
+        if (d < 256 + 0x54) { 
+          if (keytable[d - 256] != 0) {
+            s[0] = keytable[d - 256];
+            s[1] = 0;
+            str_renderer_sht(sht_win, 40, 28, COL8_000000, COL8_C6C6C6, s, 1);
+          }
+        }
       } else if (512 <= d && d <= 767) { //mouse
         if (mouse_decode(&mdec, d - 512) != 0) {
           sprintf(s, "[lcr %d %d]", mdec.x, mdec.y);
