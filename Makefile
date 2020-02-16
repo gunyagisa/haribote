@@ -4,7 +4,7 @@ SRC = ./src/
 
 QEMU = qemu-system-i386
 CC = gcc
-CFLAGS=-Wall -c -m32 -fno-pic -fno-stack-protector
+CFLAGS=-Wall -c -march=i486 -m32 -fno-pic -nostdlib
 
 $(BUILD)%.bin: $(SRC)%.asm Makefile
 	nasm -o $@ $<
@@ -33,7 +33,7 @@ $(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys Makefile
 
 
 run: $(BUILD)geocide.img
-	$(QEMU) -m 32  -fda $< -show-cursor -monitor stdio
+	$(QEMU) -m 32 -d guest_errors -fda $< -show-cursor -monitor stdio
 
 clean:
 	rm -f $(BUILD)*.bin $(BUILD)*.o $(BUILD)geocide.*
