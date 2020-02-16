@@ -7,6 +7,7 @@ global 	io_out8 ,io_out16, io_out32, io_in8, io_in16, io_in32
 global	io_store_eflags ,io_load_eflags, store_cr0, load_cr0
 global	load_gdtr, load_idtr
 global  inthandler21_asm, inthandler2c_asm, inthandler20_asm
+global  load_tr, taskswitch
 
 EXTERN  inthandler21, inthandler2c, inthandler20
 
@@ -98,6 +99,14 @@ load_idtr:
 	mov		[esp+6], ax
 	lidt	        [esp+6]
 	ret
+
+load_tr:
+        ltr             [esp + 4]
+        ret
+
+taskswitch:
+        jmp             4*8:0
+        ret
 
 inthandler21_asm:
 	pushad

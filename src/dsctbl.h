@@ -2,6 +2,7 @@
 
 // access right
 #define AR_INTGATE32		0x008e
+#define AR_TSS32                0x0089
 
 // table address
 #define GDT_ADDR	0x00270000

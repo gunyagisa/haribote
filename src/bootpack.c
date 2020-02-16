@@ -2,12 +2,13 @@
 #include "graphic.h" 
 #include "dsctbl.h"
 #include "interrupt.h"
-#include "fifo.h"
 #include "mouse.h"
 #include "keyboard.h"
 #include "mysprintf.h" 
 #include "memory.h"
 #include "sheet.h"
+#include "dsctbl.h"
+
 
 void make_window8(unsigned char *buf, int xsize, int ysize, char *title)
 {
@@ -65,14 +66,20 @@ void str_renderer_sht(struct SHEET *sht, int x, int y, int c, int b, char *s, in
   sheet_refresh(sht, x, y, x + l * 8, y + 16);
 }
 
+struct TSS32 {
+  int backlink, esp0, ss0, esp1, ss1, esp2, ss2, cr3;
+  int eip, eflags, eax, ecx, edx, ebx, esp, ebp, esi, edi;
+  int es, cs, ss, ds, fs, gs;
+  int ldtr, iomap;
+};
+
+void task_b_main(void)
+{
+  for (;;) { io_hlt(); }
+}
+
 void HariMain(void) 
 {
-  static char keytable[0x54] = {
-    0, 0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '^', 0, 0,
-    'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '@', '[', 0, 0,'A', 'S',
-    'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', ':', 0, 0, ']', 'Z', 'X', 'C', 'V',
-    'B', 'N', 'M', ',', '.', '/', 0, '*', 0, ' ', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, '7', '8', '9', '-', '4', '5', '6', '+', '1', '2', '3', '0', '.'};
 
   BOOTINFO *binfo = (BOOTINFO *) BOOTINFO_ADDR;
   char s[40];
@@ -85,8 +92,19 @@ void HariMain(void)
   struct SHEET *sht_back, *sht_mouse, *sht_win;
   unsigned char *buf_back, buf_mouse[256], *buf_win;
   struct TIMER *timer1, *timer2, *timer3;
+  static char keytable[0x54] = {
+      0,   0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '^',   0,   0,
+    'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '@', '[',   0,   0, 'A', 'S',
+    'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', ':',   0,   0, ']', 'Z', 'X', 'C', 'V',
+    'B', 'N', 'M', ',', '.', '/',   0, '*',   0, ' ',   0,   0,   0,   0,   0,   0,
+      0,   0,   0,   0,   0,   0,   0, '7', '8', '9', '-', '4', '5', '6', '+', '1',
+    '2', '3', '0', '.'
+  };
 
-  unsigned int memtotal, counter = 0;
+  int task_b_esp;
+  struct TSS32 tss_a, tss_b;
+
+  unsigned int memtotal;
   mx = (binfo->scrnx - 16) / 2;
   my = (binfo->scrny - 28 - 16) / 2;
 
@@ -100,6 +118,8 @@ void HariMain(void)
   init_pic();
   io_sti();
   fifo32_init(&fifo, 128, fifobuf);
+
+  SEGMENT_DISCRIPTOR *gdt = (SEGMENT_DISCRIPTOR *) GDT_ADDR;
 
   init_pit();         // PIT configure
 
@@ -121,7 +141,7 @@ void HariMain(void)
 
   init_palette();	//configure color setting
 
-  shtctl = shtctl_init(memman, binfo->vram, binfo->scrnx, binfo->scrny);
+  shtctl = shtctl_init(memman, (unsigned char *)binfo->vram, binfo->scrnx, binfo->scrny);
   sht_back = sheet_alloc(shtctl);
   sht_mouse = sheet_alloc(shtctl);
   sht_win = sheet_alloc(shtctl);
@@ -133,7 +153,7 @@ void HariMain(void)
   sheet_setbuf(sht_mouse, buf_mouse, 16, 16, 99);
   sheet_setbuf(sht_win, buf_win, 160, 52, -1);
   init_screen(buf_back, binfo->scrnx, binfo->scrny);
-  init_mouse_cursor8(buf_mouse, 99);
+  init_mouse_cursor8((char *)buf_mouse, 99);
   make_window8(buf_win, 160, 52, "window");
 
   sheet_slide(sht_back, 0, 0);
@@ -150,6 +170,30 @@ void HariMain(void)
   str_renderer8(buf_back, binfo->scrnx, COL8_FFFFFF, 0, 32, s);
   sheet_refresh(sht_back, 0, 0, binfo->scrnx, 48);
 
+  tss_a.ldtr = 0;
+  tss_a.iomap = 0x40000000;
+  tss_b.ldtr = 0;
+  tss_a.iomap = 0x40000000;
+  set_sgmntdsc(gdt + 3, 103, (int) &tss_a, AR_TSS32);
+  set_sgmntdsc(gdt + 4, 103, (int) &tss_b, AR_TSS32);
+  load_tr(3 * 8);
+  task_b_esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024;
+  tss_b.eip = (int) &task_b_main;
+  tss_b.eflags = 0x00000202; 	/* IF = 1 */
+  tss_b.eax = 0;
+  tss_b.ecx = 0;
+  tss_b.edx = 0;
+  tss_b.ebx = 0;
+  tss_b.esp = task_b_esp;
+  tss_b.ebp = 0;
+  tss_b.esi = 0;
+  tss_b.edi = 0;
+  tss_b.es = 1 * 8;
+  tss_b.cs = 2 * 8;
+  tss_b.ss = 1 * 8;
+  tss_b.ds = 1 * 8;
+  tss_b.fs = 1 * 8;
+  tss_b.gs = 1 * 8;
 
   for (;;) {
     io_cli();
@@ -200,9 +244,9 @@ void HariMain(void)
         }
       } else if (d == 10) {
         str_renderer_sht(sht_back, 0, 64, COL8_FFFFFF, COL8_008484, "10[sec]", 7);
+        taskswitch();
       } else if (d == 3) {
         str_renderer_sht(sht_back, 0, 80, COL8_FFFFFF, COL8_008484, "3[sec]", 6);
-        counter = 0;
       } else {
         if (d != 0) {
           timer_init(timer3, &fifo, 0);
