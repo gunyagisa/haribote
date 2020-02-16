@@ -14,7 +14,12 @@ void make_window8(unsigned char *buf, int xsize, int ysize, char *title)
   static char closebtn[14][16] = {
     "00000000000000$@",
     "0QQQQQQQQQQQQQ$@",
-    "0QQQQQQQQQQQQQ$@", "0QQQ@@QQQQ@@QQ$@", "0QQQQ@@QQ@@QQQ$@", "0QQQQQ@@@@QQQQ$@", "0QQQQQQ@@QQQQQ$@", "0QQQQQ@@@@QQQQ$@",
+    "0QQQQQQQQQQQQQ$@", 
+    "0QQQ@@QQQQ@@QQ$@", 
+    "0QQQQ@@QQ@@QQQ$@", 
+    "0QQQQQ@@@@QQQQ$@", 
+    "0QQQQQQ@@QQQQQ$@", 
+    "0QQQQQ@@@@QQQQ$@",
     "0QQQQ@@QQ@@QQQ$@",
     "0QQQ@@QQQQ@@QQ$@",
     "0QQQQQQQQQQQQQ$@",
@@ -188,6 +193,10 @@ void HariMain(void)
           sprintf(s, "(%d, %d)", mx, my);
           str_renderer_sht(sht_back, 0, 0, COL8_FFFFFF, COL8_008484, s, 10);
           sheet_slide(sht_mouse, mx, my);
+          if ((mdec.btn & 0x01) != 0) {
+            // move sht_win
+            sheet_slide(sht_win, mx - 80, my - 8);
+          }
         }
       } else if (d == 10) {
         str_renderer_sht(sht_back, 0, 64, COL8_FFFFFF, COL8_008484, "10[sec]", 7);
