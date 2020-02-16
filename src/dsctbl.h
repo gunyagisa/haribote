@@ -9,16 +9,16 @@
 
 //segment discriptor
 typedef struct SEGMENT_DISCRIPTOR {
-	short limit_low, base_low;
-	char base_mid, access_right;
-	char limit_high, base_high;
+  short limit_low, base_low;
+  char base_mid, access_right;
+  char limit_high, base_high;
 } SEGMENT_DISCRIPTOR;
 
 //interrupt discriptor
 typedef struct GATE_DISCRIPTOR {
-	short offset_low, selector;
-	char dw_count, access_right;
-	short offset_high;
+  short offset_low, selector;
+  char dw_count, access_right;
+  short offset_high;
 } GATE_DISCRIPTOR; 
 
 // dsctbl.c

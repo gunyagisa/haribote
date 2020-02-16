@@ -1,8 +1,8 @@
 #pragma once
 
 typedef struct FIFO32 {
-	int *buf;
-	int next_r, next_w, size, free, flags;
+  int *buf;
+  int next_r, next_w, size, free, flags;
 } FIFO32;
 
 void fifo32_init(FIFO32 *fifo, int size, int *buf);

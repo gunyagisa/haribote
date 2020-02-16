@@ -25,21 +25,22 @@ extern void inthandler20_asm(void);
 
 //struct to store the boot information written in asmhead.asm
 typedef struct BOOTINFO {
-	char cyls, leds, vmode, reserve;
-	short scrnx, scrny;
-	char *vram;
+  char cyls, leds, vmode, reserve;
+  short scrnx, scrny;
+  char *vram;
 } BOOTINFO;
 
 struct TIMER {
-    unsigned int timeout, flags;
-    FIFO32 *fifo;
-    unsigned char data;
+  struct TIMER *next;
+  unsigned int timeout, flags;
+  FIFO32 *fifo;
+  unsigned char data;
 };
 
 struct TIMERCTL {
-    unsigned int count, next, using;
-    struct TIMER timers0[MAX_TIMER];
-    struct TIMER *timers[MAX_TIMER];
+  unsigned int count, next, using;
+  struct TIMER timers0[MAX_TIMER];
+  struct TIMER *t0;
 };
 extern struct TIMERCTL timectl;
 
