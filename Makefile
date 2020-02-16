@@ -31,7 +31,7 @@ $(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys Makefile
 
 
 run: $(BUILD)geocide.img
-	$(QEMU) -m 32 -vga std -fda $< -show-cursor -monitor stdio
+	$(QEMU) -m 32  -fda $< -show-cursor -monitor stdio
 
 clean:
 	rm -f $(BUILD)*.bin $(BUILD)*.o $(BUILD)geocide.*

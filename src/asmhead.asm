@@ -12,17 +12,58 @@ SCRNX	EQU		0x0ff4
 SCRNY	EQU		0x0ff6
 VRAM	EQU		0x0ff8
 
+VBEMODE EQU             0x105
+
 	ORG		0xc200
 
-	MOV		AL, 0x13
-	MOV 	AH, 0x00
+; check vbe
+        mov             ax, 0x9000
+        mov             es, ax
+        MOV             di, 0
+        mov             ax, 0x4f00
+        int             0x10
+        cmp             ax, 0x004f
+        jne             scrn320
+        mov             ax, [es:di+4]
+        cmp             ax, 0x0200
+        jb              scrn320
+
+        mov             cx, VBEMODE
+        mov             ax, 0x4f01
+        int             0x10
+        cmp             ax, 0x004f
+        jne             scrn320
+        cmp             byte [es:di+0x19], 8
+        jne             scrn320
+        cmp             byte [es:di+0x1b], 4
+        jne             scrn320
+        mov             ax, [es:di+0x00]
+        and             ax, 0x0080
+        jz              scrn320
+
+        mov             bx, VBEMODE+0x4000
+        mov             ax, 0x4f02
 	INT		0x10			;VGAgraphics 320x200x8bit color
 	MOV		BYTE [VMODE], 8
-	MOV		WORD [SCRNX], 320
-	MOV		WORD [SCRNY], 200
-	MOV		DWORD [VRAM], 0x000a0000
+        mov             ax, [es:di+0x12]
+	MOV		WORD [SCRNX], ax
+        mov             ax, [es:di+0x14]
+	MOV		WORD [SCRNY], ax
+        mov             eax, [es:di+0x28]
+	MOV		DWORD [VRAM], eax
+        jmp             keystatus
+
+scrn320:
+        mov             al, 0x13
+        mov             ah, 0x00
+        int             0x10
+        mov             byte [VMODE], 8
+        mov             byte [SCRNY], 320
+        mov             byte [SCRNX], 200
+        mov             DWORD [VRAM], 0x000a0000
 
 ;keyboard led
+keystatus:
 	MOV		AH, 0x02
 	INT		0x16
 	MOV		[LEDS], AL
