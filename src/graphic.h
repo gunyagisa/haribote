@@ -8,7 +8,7 @@ void set_palette(int start, int end, unsigned char *rgb);
 void init_screen(unsigned char *vram, int xsize, int ysize);
 void boxfill8(unsigned char *vram, int bx, unsigned char c, int x0, int y0, int x1, int y1);
 void font_renderer8(unsigned char *vram, int xsize, char color_code, int x, int y, char *font); 
-void str_renderer8(unsigned char *buf, int xsize, char color_code, int x, int y, unsigned char *str);
+void str_renderer8(unsigned char *buf, int xsize, char color_code, int x, int y, char *str);
 void block_renderer8(char *vram, int vxsize, int pxsize, int pysize, int px0, int py0, char *buf, int bxsize);
 void init_mouse_cursor8(char *mouse, char back_color);
 

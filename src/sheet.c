@@ -161,7 +161,6 @@ void sheet_slide(struct SHEET *sht, int vx0, int vy0)
 
 void sheet_free(struct SHEET *sht)
 {
-    struct SHTCTL *ctl = sht->ctl;
     if (sht->height >= 0) {
         sheet_updown(sht, -1);
     }

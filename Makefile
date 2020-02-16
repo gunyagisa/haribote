@@ -3,18 +3,20 @@ BUILD = ./build-cache/
 SRC = ./src/
 
 QEMU = qemu-system-i386
+CC = gcc
+CFLAGS=-Wall -c -m32 -fno-pic -fno-stack-protector
 
 $(BUILD)%.bin: $(SRC)%.asm Makefile
 	nasm -o $@ $<
 
 $(BUILD)%.o: $(SRC)%.c $(SRC)%.h Makefile
-	gcc -c -m32 -fno-pic -fno-stack-protector -o $@ $<
+	$(CC) $(CFLAGS) -o $@ $<
 
 $(BUILD)%.o: $(SRC)%.c Makefile
-	gcc -c -m32 -fno-pic -fno-stack-protector -o $@ $<
+	$(CC) $(CFLAGS) -o $@ $<
 
 $(BUILD)hankaku.o: $(SRC)hankaku.c Makefile
-	gcc -c -m32 -o $@ $<
+	$(CC) -c -m32 -o $@ $<
 
 $(BUILD)nasmfunc.o: $(SRC)nasmfunc.asm Makefile
 	nasm -f elf32 -o $@ $<

@@ -33,9 +33,9 @@ int hex2asc (char *str, int dec) { //10で割れた回数（つまり桁数）�
     return len_buf;
 }
 
-void sprintf(char *str, char *fmt, ...) {
+void sprintf(char *str, const char *fmt, ...) {
     va_list list;
-    int i, len;
+    int len;
     va_start(list, fmt);
 
     while (*fmt) {
