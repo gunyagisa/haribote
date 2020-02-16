@@ -140,10 +140,9 @@ void HariMain(void)
 
 
   for (;;) {
-    counter++;
     io_cli();
     if (fifo32_status(&fifo) == 0) {
-      io_sti();
+      io_stihlt();
     } else {
       d = fifo32_get(&fifo);
       if (256 <= d && d <= 511) { //keyboard
@@ -178,8 +177,6 @@ void HariMain(void)
         }
       } else if (d == 10) {
         str_renderer_sht(sht_back, 0, 64, COL8_FFFFFF, COL8_008484, "10[sec]", 7);
-        sprintf(s, "%d", counter);
-        str_renderer_sht(sht_win, 40, 28, COL8_000000, COL8_C6C6C6, s, 15);
       } else if (d == 3) {
         str_renderer_sht(sht_back, 0, 80, COL8_FFFFFF, COL8_008484, "3[sec]", 6);
         counter = 0;
