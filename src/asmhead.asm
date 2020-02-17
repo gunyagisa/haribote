@@ -57,9 +57,9 @@ scrn320:
         mov             al, 0x13
         mov             ah, 0x00
         int             0x10
-        mov             byte [VMODE], 8
-        mov             byte [SCRNY], 320
-        mov             byte [SCRNX], 200
+        mov             BYTE [VMODE], 8
+        mov             WORD [SCRNX], 320
+        mov             WORD [SCRNY], 200
         mov             DWORD [VRAM], 0x000a0000
 
 ;keyboard led
@@ -143,7 +143,7 @@ memcpy:
 	JNZ		memcpy
 	RET
 	
-	ALIGNB	16
+	TIMES 16 DB 0
 GDT0:
 	TIMES 8 DB 0
 	DW		0xffff, 0x0000, 0x9200, 0x00cf
@@ -154,5 +154,5 @@ GDTR0:
 	DW		8*3-1
 	DD		GDT0
 
-	ALIGNB	16
+	TIMES 16 DB 0
 bootpack:
