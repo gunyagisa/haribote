@@ -173,7 +173,7 @@ void HariMain(void)
   tss_a.ldtr = 0;
   tss_a.iomap = 0x40000000;
   tss_b.ldtr = 0;
-  tss_a.iomap = 0x40000000;
+  tss_b.iomap = 0x40000000;
   set_sgmntdsc(gdt + 3, 103, (int) &tss_a, AR_TSS32);
   set_sgmntdsc(gdt + 4, 103, (int) &tss_b, AR_TSS32);
   load_tr(3 * 8);
