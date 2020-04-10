@@ -1,59 +1,115 @@
 #include <stdarg.h>
 
-//10進数からASCIIコードに変換
-int dec2asc (char *str, int dec) {
-    int len = 0, len_buf; //桁数
-    int buf[10];
-    while (1) { //10で割れた回数（つまり桁数）をlenに、各桁をbufに格納
-        buf[len++] = dec % 10;
-        if (dec < 10) break;
-        dec /= 10;
-    }
-    len_buf = len;
-    while (len) {
-        *(str++) = buf[--len] + 0x30;
-    }
-    return len_buf;
+int string(const char *, char *, int ,int);
+
+void str_reverse(char *str, int size)
+{
+  for (int j = 0;j < size / 2;++j) {
+    char tmp = str[size - 1 - j];
+    str[size - 1 - j] = str[j]; str[j] = tmp;
+  }
 }
 
-//16進数からASCIIコードに変換
-int hex2asc (char *str, int dec) { //10で割れた回数（つまり桁数）をlenに、各桁をbufに格納
-    int len = 0, len_buf; //桁数
-    int buf[10];
-    while (1) {
-        buf[len++] = dec % 16;
-        if (dec < 16) break;
-        dec /= 16;
-    }
-    len_buf = len;
-    while (len) {
-        len --;
-        *(str++) = (buf[len]<10)?(buf[len] + 0x30):(buf[len] - 9 + 0x60);
-    }
-    return len_buf;
+int decimal(int n, char *str, int zero, int width)
+{
+  char buf[126] = {0};
+  int d = 10;
+  int i = 0;
+  while (n != 0) {
+    buf[i++] = n % d + '0';
+    n /= d;
+  }
+  str_reverse(buf, i);
+  string(buf, str, zero, width);
+  return i;
 }
 
-void sprintf(char *str, const char *fmt, ...) {
-    va_list list;
-    int len;
-    va_start(list, fmt);
-
-    while (*fmt) {
-        if(*fmt=='%') {
-            fmt++;
-            switch(*fmt){
-                case 'd':
-                    len = dec2asc(str, va_arg (list, int));
-                    break;
-                case 'x':
-                    len = hex2asc(str, va_arg (list, int));
-                    break;
-            }
-            str += len; fmt++;
-        } else {
-            *(str++) = *(fmt++);
-        }   
+int hex(unsigned int n, char *str, int zero, int width)
+{
+  char buf[125] = {0};
+  int d = 16;
+  int i = 0;
+  while (n != 0) {
+    int tmp = n % d;
+    if (tmp < 10) {
+      buf[i++] = '0' + tmp;
+    } else {
+      buf[i++] = 'a' + (tmp - 10);
     }
-    *str = 0x00; //最後にNULLを追加
-    va_end (list);
+    n /= d;
+  }
+
+  str_reverse(buf, i);
+  string(buf, str, zero, width);
+
+  return i;
+}
+
+int string(const char *n, char *str, int zero, int width)
+{
+  int i = 0;
+  while (*n != '\0') {
+    *(str++) = *(n++);
+    i++;
+  }
+  return i;
+}
+
+int vsprintf(char *str, const char *fmt, va_list arg)
+{
+  int len = 0;
+  int size = 0;
+  int zeroflag, width;
+
+  while (*fmt != '\0') {
+    if (*fmt == '%') {
+      zeroflag = width = 0;
+      fmt++;
+      if (*fmt == '0') {
+        zeroflag = 1;
+        fmt++;
+      }
+      if ((*fmt >= '0') && (*fmt <= 9)) {
+        width = *(fmt++) - '0';
+      }
+      switch (*fmt) {
+        case 'd':
+          size = decimal(va_arg(arg, int),str,zeroflag, width);
+          break;
+        case 'x':
+          size = hex(va_arg(arg, int), str, zeroflag, width);
+          break;
+        case 's':
+          size = string(va_arg(arg, char *), str, zeroflag, width);
+          break;
+        default:
+          *(str) = *(fmt);
+          size = 1;
+          break;
+      }
+      fmt++;
+      str += size;
+      len += size;
+    } else {
+      *(str++) = *(fmt++);
+      len++;
+    }
+  }
+
+  *(str) = '\0';
+  va_end(arg);
+  return len;
+}
+
+int sprintf(char *str, const char *fmt, ...)
+{
+  va_list arg;
+  int len;
+
+  va_start(arg, fmt);
+  len = vsprintf(str, fmt, arg);
+
+  va_end(arg);
+
+  return len;
 }
