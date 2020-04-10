@@ -20,7 +20,7 @@ extern void io_store_eflags(int eflags), store_cr0(int cr0);
 extern void load_gdtr(int limit, int addr);
 extern void load_idtr(int limit, int addr);
 extern void load_tr(int tr);
-extern void taskswitch(void);
+extern void farjmp(int, int);
 extern void inthandler21_asm(void);
 extern void inthandler2c_asm(void);
 extern void inthandler20_asm(void);

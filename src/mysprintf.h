@@ -2,6 +2,16 @@
 
 int string(const char *, char *, int ,int);
 
+int strlen(const char *str)
+{
+  int i = 0;
+  for (;;) {
+    if (str[i] == '\0') return i;
+  }
+
+  return -1;
+}
+
 void str_reverse(char *str, int size)
 {
   for (int j = 0;j < size / 2;++j) {
@@ -12,7 +22,7 @@ void str_reverse(char *str, int size)
 
 int decimal(int n, char *str, int zero, int width)
 {
-  char buf[126] = {0};
+  char buf[13] = {0};
   int d = 10;
   int i = 0;
   while (n != 0) {
@@ -26,7 +36,7 @@ int decimal(int n, char *str, int zero, int width)
 
 int hex(unsigned int n, char *str, int zero, int width)
 {
-  char buf[125] = {0};
+  char buf[10] = {0};
   int d = 16;
   int i = 0;
   while (n != 0) {
