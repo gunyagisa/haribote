@@ -9,29 +9,29 @@ void init_gdtidt(void)
 	int i;
 
 	// gdt initialize
-	for (i = 0;i < 8192;i++) {
+	for (i = 0;i < LIMIT_GDT / 8;i++) {
 		set_sgmntdsc(gdt + i, 0, 0, 0);
 	}
 
-	set_sgmntdsc(gdt + 1, 0xffffffff, 0x00000000, 0x4029);
-	set_sgmntdsc(gdt + 2, 0x0007ffff, 0x00280000, 0x409a);
-	load_gdtr(0xffff, 0x00270000);
+	set_sgmntdsc(gdt + 1, 0xffffffff, 0x00000000, AR_DATA32_RW);
+	set_sgmntdsc(gdt + 2, 0x0007ffff, 0x00280000, AR_CODE32_ER);
+        load_gdtr(LIMIT_GDT, GDT_ADDR);
 
 	// idt initialize
-	for (i = 0;i < 256;i++) {
+	for (i = 0;i < LIMIT_IDT / 8;i++) {
 		set_gatedsc(idt + i, 0, 0, 0);
 	}
 
         set_gatedsc(idt + 0x20, (int) inthandler20_asm, 2 * 8, AR_INTGATE32);
 	set_gatedsc(idt + 0x21, (int) inthandler21_asm, 2 * 8, AR_INTGATE32);
 	set_gatedsc(idt + 0x2c, (int) inthandler2c_asm, 2 * 8, AR_INTGATE32);
-	load_idtr(0x7ff, 0x0026f800);
+        load_idtr(LIMIT_IDT, IDT_ADDR);
 
 }
 
 void set_sgmntdsc(SEGMENT_DISCRIPTOR *sd, unsigned int limit, int base, int access_right)
 {
-	if (limit > 0xffffffff) {
+	if (limit > 0xffff) {
 		access_right |= 0x8000;
 		limit /= 0x1000;
 	}

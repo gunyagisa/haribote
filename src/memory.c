@@ -109,7 +109,7 @@ int memman_free(struct MEMMAN *man, unsigned int addr, unsigned int size)
             man->free[i - 1].size += size;
             if (i < man->frees) {
                 if (addr + size == man->free[i].addr) {
-                    man->free[i - i].size += man->free[i].size;
+                    man->free[i - 1].size += man->free[i].size;
                     man->frees--;
                     for (;i < man->frees;i++) {
                         man->free[i] = man->free[i + 1];
