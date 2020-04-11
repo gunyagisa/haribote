@@ -105,13 +105,13 @@ void task_b_main(struct SHEET *sht_win_b)
     ++count;
     io_cli();
     if (fifo32_status(&fifo) == 0) {
-      io_sti();
+      io_stihlt();
     } else {
       i = fifo32_get(&fifo);
       io_sti();
       if (i == 100) {
         sprintf(s, "%d", count - count0);
-        str_renderer_sht(sht_win_b, 24, 8, COL8_000000, COL8_C6C6C6, s, 11);
+        str_renderer_sht(sht_win_b, 24, 28, COL8_000000, COL8_C6C6C6, s, 11);
         count0 = count;
         settimer(timer_cnt, 100);
       }     
@@ -201,7 +201,7 @@ void HariMain(void)
   // sht_win
   sht_win = sheet_alloc(shtctl);
   buf_win = (unsigned char *) memman_alloc_4k(memman, 160 * 52);
-  sheet_setbuf(sht_win, buf_win, 160, 52, -1);
+  sheet_setbuf(sht_win, buf_win, 144, 52, -1);
   make_window8(buf_win, 144, 52, "task_a", 1);
   make_textbox8(sht_win, 8, 28, 128, 16, COL8_FFFFFF);
   int cursor_x, cursor_c;
