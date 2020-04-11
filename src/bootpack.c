@@ -86,26 +86,48 @@ struct TSS32 {
   int ldtr, iomap;
 };
 
-void task_b_main(void)
+void task_b_main(struct SHEET *sht_back)
 {
   struct FIFO32 fifo;
-  struct TIMER *timer;
+  struct TIMER *timer_ts, *timer_scrn, *timer_cnt;
   int i, fifobuf[126];
 
+  char s[11];
+
   fifo32_init(&fifo, 126, fifobuf);
-  timer = timer_alloc();
-  timer_init(timer, &fifo, 1);
-  settimer(timer, 500);
+  timer_ts = timer_alloc();
+  timer_init(timer_ts, &fifo, 2);
+  settimer(timer_ts, 2);
+
+  timer_scrn = timer_alloc();
+  timer_init(timer_scrn, &fifo, 1);
+  settimer(timer_scrn, 1);
+
+  timer_cnt = timer_alloc();
+  timer_init(timer_cnt, &fifo, 100);
+  settimer(timer_cnt, 100);
+  int count = 0, count0 = 0;
 
   for (;;) {
+    count++;
     io_cli();
     if (fifo32_status(&fifo) == 0) {
       io_stihlt();
     } else {
       i = fifo32_get(&fifo);
       io_sti();
-      if (i == 1) {
+      if (i == 2) {
         farjmp(0, 3 * 8);
+        settimer(timer_ts, 2);
+      } else if (i == 1) {
+        sprintf(s, "%d", count);
+        str_renderer_sht(sht_back, 0, 144, COL8_FFFFFF, COL8_008484, s, 10);
+        settimer(timer_scrn, 1);
+      } else if (i == 100) {
+        sprintf(s, "%d", count - count0);
+        str_renderer_sht(sht_back, 0, 128, COL8_FFFFFF, COL8_008484, s, 11);
+        count0 = count;
+        settimer(timer_cnt, 100);
       }
     }
   }
@@ -124,7 +146,8 @@ void HariMain(void)
   struct SHTCTL *shtctl;
   struct SHEET *sht_back, *sht_mouse, *sht_win;
   unsigned char *buf_back, buf_mouse[256], *buf_win;
-  struct TIMER *timer1, *timer2, *timer3;
+  struct TIMER *timer1, *timer2, *timer3, *timer_ts;
+
   static char keytable[0x54] = {
       0,   0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '^',   0,   0,
     'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '@', '[',   0,   0, 'A', 'S',
@@ -165,12 +188,18 @@ void HariMain(void)
   timer1 = timer_alloc();
   timer_init(timer1, &fifo, 10);
   settimer(timer1, 1000);
+
   timer2 = timer_alloc();
   timer_init(timer2, &fifo, 3);
   settimer(timer2, 300);
+
   timer3 = timer_alloc();
   timer_init(timer3, &fifo, 1);
   settimer(timer3, 50);
+
+  timer_ts = timer_alloc();
+  timer_init(timer_ts, &fifo, 2);
+  settimer(timer_ts, 2);
 
   init_palette();	//configure color setting
 
@@ -178,6 +207,8 @@ void HariMain(void)
   sht_back = sheet_alloc(shtctl);
   sht_mouse = sheet_alloc(shtctl);
   sht_win = sheet_alloc(shtctl);
+
+  *((int *) 0xfec) = (int) sht_back;
 
   buf_back = (unsigned char *) memman_alloc_4k(memman, binfo->scrnx * binfo->scrny);
   buf_win = (unsigned char *) memman_alloc_4k(memman, 160 * 52);
@@ -216,13 +247,14 @@ void HariMain(void)
   set_sgmntdsc(gdt + 4, 103, (int) &tss_b, AR_TSS32);
   load_tr(3 * 8);
   task_b_esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024;
+  *((int * ) (task_b_esp - 4)) = (int) sht_back;
   tss_b.eip = (int) &task_b_main;
   tss_b.eflags = 0x00000202; 	/* IF = 1 */
   tss_b.eax = 0;
   tss_b.ecx = 0;
   tss_b.edx = 0;
   tss_b.ebx = 0;
-  tss_b.esp = task_b_esp;
+  tss_b.esp = task_b_esp - 8;
   tss_b.ebp = 0;
   tss_b.esi = 0;
   tss_b.edi = 0;
@@ -241,7 +273,10 @@ void HariMain(void)
     } else {
       d = fifo32_get(&fifo);
       io_sti();
-      if (256 <= d && d <= 511) { //keyboard
+      if (d == 2) {
+        farjmp(0, 4 * 8);
+        settimer(timer_ts, 2);
+      } else if (256 <= d && d <= 511) { //keyboard
         sprintf(s, "%x", d - 256);
         str_renderer_sht(sht_back, 0, 16, COL8_FFFFFF, COL8_008484, s, 2);
         if (d < 0x54 + 256) {
@@ -293,7 +328,6 @@ void HariMain(void)
         }
       } else if (d == 10) {
         str_renderer_sht(sht_back, 0, 64, COL8_FFFFFF, COL8_008484, "10[sec]", 7);
-        farjmp(0, 4 * 8);
       } else if (d == 3) {
         str_renderer_sht(sht_back, 0, 80, COL8_FFFFFF, COL8_008484, "3[sec]", 6);
       } else {
