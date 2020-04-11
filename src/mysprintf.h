@@ -1,16 +1,8 @@
+#pragma once
+
 #include <stdarg.h>
 
 int string(const char *, char *, int ,int);
-
-int strlen(const char *str)
-{
-  int i = 0;
-  for (;;) {
-    if (str[i] == '\0') return i;
-  }
-
-  return -1;
-}
 
 void str_reverse(char *str, int size)
 {
@@ -22,7 +14,7 @@ void str_reverse(char *str, int size)
 
 int decimal(int n, char *str, int zero, int width)
 {
-  char buf[13] = {0};
+  static char buf[13] = {0};
   int d = 10;
   int i = 0;
   while (n != 0) {
@@ -36,7 +28,7 @@ int decimal(int n, char *str, int zero, int width)
 
 int hex(unsigned int n, char *str, int zero, int width)
 {
-  char buf[10] = {0};
+  static char buf[10] = {0};
   int d = 16;
   int i = 0;
   while (n != 0) {

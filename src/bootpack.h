@@ -1,5 +1,7 @@
 #pragma once
 
+#include "memory.h"
+
 #define BOOTINFO_ADDR 	0x00000ff0
 
 #define EFLAGS_AC_BIT           0x00040000
@@ -32,6 +34,8 @@ typedef struct BOOTINFO {
   char *vram;
 } BOOTINFO;
 
+// timer
+extern struct TIMER *task_timer;
 struct TIMER {
   struct TIMER *next;
   unsigned int timeout, flags;
@@ -46,7 +50,34 @@ struct TIMERCTL {
 };
 extern struct TIMERCTL timectl;
 
-extern void init_pit(void);
-extern void settimer(struct TIMER *timer, unsigned int timeout);
-extern struct TIMER *timer_alloc(void);
-extern void timer_init(struct TIMER *timer, FIFO32 *fifo, int data);
+void init_pit(void);
+void settimer(struct TIMER *timer, unsigned int timeout);
+struct TIMER *timer_alloc(void);
+void timer_init(struct TIMER *timer, FIFO32 *fifo, int data);
+
+//mtask
+#define MAX_TASKS       1000
+#define TASK_GDT0       3
+
+struct TSS32 {
+  int backlink, esp0, ss0, esp1, ss1, esp2, ss2, cr3;
+  int eip, eflags, eax, ecx, edx, ebx, esp, ebp, esi, edi;
+  int es, cs, ss, ds, fs, gs;
+  int ldtr, iomap;
+};
+
+struct TASK {
+  int sel, flags;
+  struct TSS32 tss;
+};
+
+struct TASKCTL {
+  int running;
+  int now;
+  struct TASK *tasks[MAX_TASKS];
+  struct TASK tasks0[MAX_TASKS];
+};
+struct TASK * task_init(struct MEMMAN *memman);
+struct TASK *task_alloc(void);
+void task_run (struct TASK *task);
+void task_switch(void);

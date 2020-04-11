@@ -14,21 +14,21 @@
 #define LIMIT_IDT	0x000007ff
 #define LIMIT_GDT	0x0000ffff
 
-//segment discriptor
-typedef struct SEGMENT_DISCRIPTOR {
+//segment descriptor
+typedef struct SEGMENT_DESCRIPTOR {
   short limit_low, base_low;
   char base_mid, access_right;
   char limit_high, base_high;
-} SEGMENT_DISCRIPTOR;
+} SEGMENT_DESCRIPTOR;
 
-//interrupt discriptor
-typedef struct GATE_DISCRIPTOR {
+//interrupt descriptor
+typedef struct GATE_DESCRIPTOR {
   short offset_low, selector;
   char dw_count, access_right;
   short offset_high;
-} GATE_DISCRIPTOR; 
+} GATE_DESCRIPTOR; 
 
 // dsctbl.c
 void init_gdtidt(void);
-void set_sgmntdsc(SEGMENT_DISCRIPTOR *sd, unsigned int limit, int base, int access_right);
-void set_gatedsc(GATE_DISCRIPTOR *gd, int offset, int selector, int access_right);
+void set_sgmntdsc(struct SEGMENT_DESCRIPTOR *sd, unsigned int limit, int base, int access_right);
+void set_gatedsc(struct GATE_DESCRIPTOR *gd, int offset, int selector, int access_right);

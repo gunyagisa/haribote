@@ -1,10 +1,10 @@
-OBJ = bootpack.o dsctbl.o fifo.o graphic.o hankaku.o interrupt.o keyboard.o mouse.o nasmfunc.o memory.o sheet.o timer.o
+OBJ = bootpack.o dsctbl.o fifo.o graphic.o hankaku.o interrupt.o keyboard.o mouse.o nasmfunc.o memory.o sheet.o timer.o mtask.o
 BUILD = ./build-cache/
 SRC = ./src/
 
 QEMU = qemu-system-i386
-CC = gcc
-CFLAGS=-Wall -c -march=i486 -m32 -fno-pic -nostdlib
+CC = clang
+CFLAGS=-Wall -c -march=i486 -m32 -fno-pic -nostdlib -fno-stack-protector
 
 $(BUILD)%.bin: $(SRC)%.asm Makefile
 	nasm -o $@ $<

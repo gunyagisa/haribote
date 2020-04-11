@@ -3,8 +3,8 @@
 
 void init_gdtidt(void)
 {
-	SEGMENT_DISCRIPTOR *gdt = (SEGMENT_DISCRIPTOR *) GDT_ADDR;
-	GATE_DISCRIPTOR *idt = (GATE_DISCRIPTOR *) IDT_ADDR;
+	SEGMENT_DESCRIPTOR *gdt = (SEGMENT_DESCRIPTOR *) GDT_ADDR;
+	GATE_DESCRIPTOR *idt = (GATE_DESCRIPTOR *) IDT_ADDR;
 
 	int i;
 
@@ -29,7 +29,7 @@ void init_gdtidt(void)
 
 }
 
-void set_sgmntdsc(SEGMENT_DISCRIPTOR *sd, unsigned int limit, int base, int access_right)
+void set_sgmntdsc(SEGMENT_DESCRIPTOR *sd, unsigned int limit, int base, int access_right)
 {
 	if (limit > 0xffff) {
 		access_right |= 0x8000;
@@ -44,7 +44,7 @@ void set_sgmntdsc(SEGMENT_DISCRIPTOR *sd, unsigned int limit, int base, int acce
 	sd->base_high = (base >> 24) & 0xff;
 }
 
-void set_gatedsc(GATE_DISCRIPTOR *gd, int offset, int selector, int access_right)
+void set_gatedsc(GATE_DESCRIPTOR *gd, int offset, int selector, int access_right)
 {
 	gd->offset_low = offset & 0xffff;
 	gd->selector = selector;
