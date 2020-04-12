@@ -10,8 +10,6 @@ struct TASK * task_init(struct MEMMAN *memman)
   struct SEGMENT_DESCRIPTOR *gdt = (struct SEGMENT_DESCRIPTOR *) GDT_ADDR;
   taskctl = (struct TASKCTL *) memman_alloc_4k(memman, sizeof(struct TASKCTL));
 
-  task_timer = timer_alloc();
-
   for (int i = 0;i < MAX_TASKS;i++) {
     taskctl->tasks0[i].flags = 0;
     taskctl->tasks0[i].sel = (TASK_GDT0 + i) * 8;

@@ -109,19 +109,48 @@ farjmp: ; farjmp (int eip, int cs);
         ret
 
 inthandler21_asm:
-	pushad
-	call	inthandler21
-	popad
-	iretd
+        push            es
+        push            ds
+        pushad
+        mov             eax, esp
+        push            eax
+        mov             ax,ss
+        mov             ds,ax
+        mov             es,ax
+        call    inthandler21
+        pop             eax
+        popad
+        pop             ds
+        pop             es
 
 inthandler2c_asm:
-	pushad
-	call 	inthandler2c
-	popad
-	iretd
+        push            es
+        push            ds
+        pushad
+        mov             eax, esp
+        push            eax
+        mov             ax,ss
+        mov             ds,ax
+        mov             es,ax
+        call    inthandler2c
+        pop             eax
+        popad
+        pop             ds
+        pop             es
+        iretd
 
 inthandler20_asm:
+        push            es
+        push            ds
         pushad
+        mov             eax, esp
+        push            eax
+        mov             ax,ss
+        mov             ds,ax
+        mov             es,ax
         call    inthandler20
+        pop             eax
         popad
+        pop             ds
+        pop             es
         iretd

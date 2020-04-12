@@ -70,7 +70,7 @@ void make_textbox8(struct SHEET *sht, int x0, int y0, int sx, int sy, int c)
 {
   int x1 = x0 + sx, y1 = y0 + sy;
   boxfill8(sht->buf, sht->bxsize, COL8_848484, x0 - 2, y0 - 3, x1 + 1, y0 - 3);
-  boxfill8(sht->buf, sht->bxsize, COL8_848484, x0 - 3, y0 - 2, x0 - 3, y1 + 1);
+  boxfill8(sht->buf, sht->bxsize, COL8_848484, x0 - 3, y0 - 3, x0 - 3, y1 + 1);
   boxfill8(sht->buf, sht->bxsize, COL8_FFFFFF, x0 - 3, y1 + 2, x1 + 1, y1 + 2);
   boxfill8(sht->buf, sht->bxsize, COL8_FFFFFF, x1 + 2, y0 - 3, x1 + 2, y1 + 2);
   boxfill8(sht->buf, sht->bxsize, COL8_000000, x0 - 1, y0 - 2, x1 + 0, y0 - 2);
@@ -105,7 +105,7 @@ void task_b_main(struct SHEET *sht_win_b)
     ++count;
     io_cli();
     if (fifo32_status(&fifo) == 0) {
-      io_stihlt();
+      io_sti();
     } else {
       i = fifo32_get(&fifo);
       io_sti();
@@ -122,9 +122,9 @@ void task_b_main(struct SHEET *sht_win_b)
 void HariMain(void) 
 {
 
-  BOOTINFO *binfo = (BOOTINFO *) BOOTINFO_ADDR;
+  struct BOOTINFO *binfo = (BOOTINFO *) BOOTINFO_ADDR;
   char s[40];
-  FIFO32 fifo;
+  struct FIFO32 fifo;
   int fifobuf[128];
   int mx, my, d;
   struct MOUSE_DEC mdec;
@@ -132,9 +132,9 @@ void HariMain(void)
   struct SHTCTL *shtctl;
   struct SHEET *sht_back, *sht_mouse, *sht_win, *sht_win_b[3];
   unsigned char *buf_back, buf_mouse[256], *buf_win, *buf_win_b;
-  struct TIMER *timer;
 
   struct TASK *task_a, *task_b[3];
+  struct TIMER *timer;
 
   static char keytable[0x54] = {
     0,   0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '^',   0,   0,
@@ -147,12 +147,7 @@ void HariMain(void)
 
   unsigned int memtotal;
 
-  memtotal = memtest(0x00400000, 0xbfffffff);
-  memman_init(memman);
-  memman_free(memman, 0x00001000, 0x0009e000);
-  memman_free(memman, 0x00400000, memtotal - 0x00400000);
 
-  io_cli();
   init_gdtidt();
   init_pic();
   io_sti();
@@ -165,6 +160,11 @@ void HariMain(void)
 
   io_out8(PIC0_IMR, 0xf8);
   io_out8(PIC1_IMR, 0xef);
+
+  memtotal = memtest(0x00400000, 0xbfffffff);
+  memman_init(memman);
+  memman_free(memman, 0x00001000, 0x0009e000);
+  memman_free(memman, 0x00400000, memtotal - 0x00400000);
 
   init_palette();	//configure color setting
 
@@ -247,7 +247,7 @@ void HariMain(void)
         sprintf(s, "%x", d - 256);
         str_renderer_sht(sht_back, 0, 16, COL8_FFFFFF, COL8_008484, s, 2);
         if (d < 0x54 + 256) {
-          if (keytable[d - 256] != 0 && cursor_x < 144) {
+          if (keytable[d - 256] != 0 && cursor_x < 128) {
             s[0] = keytable[d - 256];
             s[1] = 0;
             str_renderer_sht(sht_win, cursor_x, 28, COL8_000000, COL8_FFFFFF, s, 1);
@@ -293,7 +293,7 @@ void HariMain(void)
             sheet_slide(sht_win, mx - 80, my - 8);
           }
         }
-      } else {
+      } else if (d <= 1){
         if (d != 0) {
           timer_init(timer, &fifo, 0);
           cursor_c = COL8_000000;

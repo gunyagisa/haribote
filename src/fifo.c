@@ -22,10 +22,10 @@ int fifo32_put(FIFO32 *fifo, int data)
   }
   fifo->buf[fifo->next_w] = data;
   fifo->next_w++;
-  fifo->free--;
   if (fifo->next_w == fifo->size)
     fifo->next_w = 0;
 
+  fifo->free--;
   if (fifo->task != 0) {
     if (fifo->task->flags != 2) {
       task_run(fifo->task);

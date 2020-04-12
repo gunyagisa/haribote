@@ -14,18 +14,18 @@
 #include "fifo.h"
 
 // nasmfunc.asm
-extern void io_hlt(void);
-extern void io_cli(void), io_sti(void), io_stihlt(void);
-extern void io_out8(int port, int data), io_out16(int port, int data), io_out32(int port, int data);
-extern int io_load_eflags(void), io_in8(int port), io_in16(int port), io_in32(int port),load_cr0();
-extern void io_store_eflags(int eflags), store_cr0(int cr0);
-extern void load_gdtr(int limit, int addr);
-extern void load_idtr(int limit, int addr);
-extern void load_tr(int tr);
-extern void farjmp(int, int);
-extern void inthandler21_asm(void);
-extern void inthandler2c_asm(void);
-extern void inthandler20_asm(void);
+void io_hlt(void);
+void io_cli(void), io_sti(void), io_stihlt(void);
+void io_out8(int port, int data), io_out16(int port, int data), io_out32(int port, int data);
+int io_load_eflags(void), io_in8(int port), io_in16(int port), io_in32(int port),load_cr0();
+void io_store_eflags(int eflags), store_cr0(int cr0);
+void load_gdtr(int limit, int addr);
+void load_idtr(int limit, int addr);
+void load_tr(int tr);
+void farjmp(int, int);
+void inthandler21_asm(void);
+void inthandler2c_asm(void);
+void inthandler20_asm(void);
 
 //struct to store the boot information written in asmhead.asm
 typedef struct BOOTINFO {
