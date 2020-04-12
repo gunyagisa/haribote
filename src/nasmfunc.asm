@@ -122,6 +122,7 @@ inthandler21_asm:
         popad
         pop             ds
         pop             es
+        iretd
 
 inthandler2c_asm:
         push            es

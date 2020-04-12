@@ -3,7 +3,7 @@
 #include "interrupt.h"
 #include "fifo.h"
 
-FIFO32 *keyfifo;
+struct FIFO32 *keyfifo;
 int keydata0;
 
 void wait_KBC_sendready(void)
@@ -14,7 +14,7 @@ void wait_KBC_sendready(void)
     }
 }
 
-void init_keyboard(FIFO32 *fifo, int data0)
+void init_keyboard(struct FIFO32 *fifo, int data0)
 {
     keyfifo = fifo;
     keydata0 = data0;
