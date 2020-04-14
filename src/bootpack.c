@@ -184,7 +184,7 @@ void HariMain(void)
   task_cons->tss.ds = 1 * 8;
   task_cons->tss.fs = 1 * 8;
   task_cons->tss.gs = 1 * 8;
-  *((int *) task_cons->tss.esp + 4) = (int) sht_cons;
+  *((int *) (task_cons->tss.esp + 4)) = (int) sht_cons;
   task_run(task_cons, 2, 2);
 
 
@@ -231,9 +231,15 @@ void HariMain(void)
             fifo32_put(&task_cons->fifo, keytable[d - 256] + 256);
           }
         }
-        if (d == 256 + 0x0e && cursor_x > 8) {
-          str_renderer_sht(sht_win, cursor_x, 28, COL8_000000, COL8_FFFFFF, " ", 1);
-          cursor_x -= 8;
+        if (d == 256 + 0x0e) {
+          if (key_to == 0) {
+            if (cursor_x > 8) {
+              str_renderer_sht(sht_win, cursor_x, 28, COL8_000000, COL8_FFFFFF, " ", 1);
+              cursor_x -= 8;
+            }
+          } else {
+            fifo32_put(&task_cons->fifo, 8 + 256);
+          }
         }
         if (d == 256 + 0x0f) {
           //tab
@@ -303,37 +309,53 @@ void HariMain(void)
 
 void console_task(struct SHEET *sht)
 {
-  struct FIFO32 fifo;
   struct TIMER *timer;
   struct TASK *task = task_now();
-  int i, fifobuf[128], cursor_x = 8, cursor_c = COL8_000000;
+  int i, fifobuf[128], cursor_x = 16, cursor_c = COL8_000000;
+  char s[2];
   
-  fifo32_init(&fifo, 128, fifobuf, task);
+  fifo32_init(&task->fifo, 128, fifobuf, task);
 
   timer = timer_alloc();
-  timer_init(timer, &fifo, 1);
+  timer_init(timer, &task->fifo, 1);
   settimer(timer, 50);
+
+  str_renderer_sht(sht, 8, 28, COL8_FFFFFF, COL8_000000, ">", 1);
 
   for (;;) {
     io_cli();
-    if (fifo32_status(&fifo) == 0) {
+    if (fifo32_status(&task->fifo) == 0) {
       task_sleep(task);
       io_sti();
     } else {
-      i = fifo32_get(&fifo);
+      i = fifo32_get(&task->fifo);
       io_sti();
       if ( i <= 1) {
         if (i != 0) {
-          timer_init(timer, &fifo, 0);
+          timer_init(timer, &task->fifo, 0);
           cursor_c = COL8_FFFFFF;
         } else {
-          timer_init(timer, &fifo, 1);
+          timer_init(timer, &task->fifo, 1);
           cursor_c = COL8_000000;
         }
         settimer(timer, 50);
-        boxfill8(sht->buf, sht->bxsize, cursor_c, cursor_x, 28, cursor_x + 7, 43);
-        sheet_refresh(sht, cursor_x, 28, cursor_x + 8, 44);
+      } else if (256 <= i && i <= 511) {
+        if (i == 8 + 256) { // backspace
+          if (cursor_x > 16) {
+            str_renderer_sht(sht, cursor_x, 28, COL8_FFFFFF, COL8_000000, " ", 1);
+            cursor_x -= 8;
+          }
+        } else {
+          if (cursor_x < 240) {
+            s[0] = i - 256;
+            s[1] = 0;
+            str_renderer_sht(sht, cursor_x, 28,  COL8_FFFFFF, COL8_000000, s, 1);
+            cursor_x += 8;
+          }
+        }
       }
+      boxfill8(sht->buf, sht->bxsize, cursor_c, cursor_x, 28, cursor_x + 7, 43);
+      sheet_refresh(sht, cursor_x, 28, cursor_x + 8, 44);
     }
   }
 }
