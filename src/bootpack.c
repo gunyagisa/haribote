@@ -219,12 +219,16 @@ void HariMain(void)
       if (256 <= d && d <= 511) { //keyboard
         sprintf(s, "%x", d - 256);
         str_renderer_sht(sht_back, 0, 16, COL8_FFFFFF, COL8_008484, s, 2);
-        if (d < 0x54 + 256) {
-          if (keytable[d - 256] != 0 && cursor_x < 128) {
-            s[0] = keytable[d - 256];
-            s[1] = 0;
-            str_renderer_sht(sht_win, cursor_x, 28, COL8_000000, COL8_FFFFFF, s, 1);
-            cursor_x += 8;
+        if (d < 0x54 + 256 && keytable[d - 256] != 0) { //normal chara
+          if (key_to == 0) { // taskA
+            if (cursor_x < 128) {
+              s[0] = keytable[d - 256];
+              s[1] = 0;
+              str_renderer_sht(sht_win, cursor_x, 28, COL8_000000, COL8_FFFFFF, s, 1);
+              cursor_x += 8;
+            }
+          } else {
+            fifo32_put(&task_cons->fifo, keytable[d - 256] + 256);
           }
         }
         if (d == 256 + 0x0e && cursor_x > 8) {

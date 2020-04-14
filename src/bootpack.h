@@ -72,6 +72,7 @@ struct TASK {
   int sel, flags;
   int level, priority;
   struct TSS32 tss;
+  struct FIFO32 fifo;
 };
 
 struct TASKLEVEL {
