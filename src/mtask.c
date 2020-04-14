@@ -117,7 +117,7 @@ struct TASK *task_now(void)
 
 void task_add(struct TASK *task)
 {
-  struct TASKLEVEL *tl = &taskctl->level[taskctl->now_lv];
+  struct TASKLEVEL *tl = &taskctl->level[task->level];
   tl->tasks[tl->running] = task;
   tl->running++;
   task->flags=2;
