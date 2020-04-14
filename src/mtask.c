@@ -11,8 +11,8 @@ struct TASK * task_init(struct MEMMAN *memman)
   taskctl = (struct TASKCTL *) memman_alloc_4k(memman, sizeof(struct TASKCTL));
 
   for (int i = 0;i < MAX_TASKS;i++) {
-    taskctl->tasks0[0].sel = (i + TASK_GDT0) * 8;
-    taskctl->tasks0[0].flags = 0;
+    taskctl->tasks0[i].sel = (i + TASK_GDT0) * 8;
+    taskctl->tasks0[i].flags = 0;
     set_sgmntdsc(gdt + TASK_GDT0 + i, 103, (int)&taskctl->tasks0[i].tss ,AR_TSS32);
   }
 
