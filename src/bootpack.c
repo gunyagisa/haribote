@@ -88,36 +88,6 @@ void str_renderer_sht(struct SHEET *sht, int x, int y, int c, int b, char *s, in
 }
 
 
-void task_b_main(struct SHEET *sht_win_b)
-{
-  struct FIFO32 fifo;
-  struct TIMER *timer_cnt;
-  int i, fifobuf[128];
-  char s[11];
-
-  fifo32_init(&fifo, 128, fifobuf, 0);
-  timer_cnt = timer_alloc();
-  timer_init(timer_cnt, &fifo, 100);
-  settimer(timer_cnt, 100);
-
-  int count = 0, count0 = 0;
-  for (;;) {
-    ++count;
-    io_cli();
-    if (fifo32_status(&fifo) == 0) {
-      io_sti();
-    } else {
-      i = fifo32_get(&fifo);
-      io_sti();
-      if (i == 100) {
-        sprintf(s, "%d", count - count0);
-        str_renderer_sht(sht_win_b, 24, 28, COL8_000000, COL8_C6C6C6, s, 11);
-        count0 = count;
-        settimer(timer_cnt, 100);
-      }     
-    }
-  }
-}
 
 void HariMain(void) 
 {
@@ -178,26 +148,6 @@ void HariMain(void)
   buf_back = (unsigned char *) memman_alloc_4k(memman, binfo->scrnx * binfo->scrny);
   sheet_setbuf(sht_back, buf_back, binfo->scrnx, binfo->scrny, -1);
   init_screen(buf_back, binfo->scrnx, binfo->scrny);
-
-  // sht_win_b
-  for (int i = 0;i < 3;i++) {
-    sht_win_b[i] = sheet_alloc(shtctl);
-    buf_win_b = (unsigned char *) memman_alloc_4k(memman, 144 * 52);
-    sheet_setbuf(sht_win_b[i], buf_win_b, 144, 52, -1);
-    sprintf(s, "task_b %d", i);
-    make_window8(buf_win_b, 144, 52, s, 0);
-    task_b[i] = task_alloc();
-    task_b[i]->tss.esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024 - 8;
-    task_b[i]->tss.eip = (int)&task_b_main;
-    task_b[i]->tss.es = 1 * 8;
-    task_b[i]->tss.cs = 2 * 8;
-    task_b[i]->tss.ss = 1 * 8;
-    task_b[i]->tss.ds = 1 * 8;
-    task_b[i]->tss.fs = 1 * 8;
-    task_b[i]->tss.gs = 1 * 8;
-    *((int *) (task_b[i]->tss.esp + 4)) = (int) sht_win_b[i];
-    task_run(task_b[i], 2, i+1);
-  }
 
   // sht_win
   sht_win = sheet_alloc(shtctl);
