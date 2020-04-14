@@ -7,7 +7,14 @@ struct TIMER *task_timer;
 struct TASK * task_init(struct MEMMAN *memman)
 {
   struct TASK *task;
+  struct SEGMENT_DESCRIPTOR *gdt = (SEGMENT_DESCRIPTOR *) GDT_ADDR;
   taskctl = (struct TASKCTL *) memman_alloc_4k(memman, sizeof(struct TASKCTL));
+
+  for (int i = 0;i < MAX_TASKS;i++) {
+    taskctl->tasks0[0].sel = (i + 3) * 8;
+    taskctl->tasks0[0].flags = 0;
+    set_sgmntdsc(gdt + TASK_GDT0 + i, 103, (int)&taskctl->tasks0[i].tss ,AR_TSS32);
+  }
 
   for (int i = 0;i < MAX_TASKLEVELS;i++) {
     taskctl->level[i].running = 0;
