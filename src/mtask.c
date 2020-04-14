@@ -125,7 +125,7 @@ void task_add(struct TASK *task)
 
 void task_remove(struct TASK *task)
 {
-  struct TASKLEVEL *tl = &taskctl->level[taskctl->now_lv];
+  struct TASKLEVEL *tl = &taskctl->level[task->level];
 
   int i;
   for (i = 0;i < tl->running;++i) {
