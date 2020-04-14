@@ -4,9 +4,14 @@
 struct TASKCTL *taskctl;
 struct TIMER *task_timer;
 
+void task_idle(void)
+{
+  for (;;) io_hlt();
+}
+
 struct TASK * task_init(struct MEMMAN *memman)
 {
-  struct TASK *task;
+  struct TASK *task, *idle;
   struct SEGMENT_DESCRIPTOR *gdt = (SEGMENT_DESCRIPTOR *) GDT_ADDR;
   taskctl = (struct TASKCTL *) memman_alloc_4k(memman, sizeof(struct TASKCTL));
 
@@ -29,8 +34,21 @@ struct TASK * task_init(struct MEMMAN *memman)
   load_tr(task->sel);
   task_timer = timer_alloc();
   settimer(task_timer, task->priority);
+
+  idle = task_alloc();
+  idle->tss.esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024;
+  idle->tss.eip = (int) &task_idle;
+  idle->tss.es = 1 * 8;
+  idle->tss.cs = 2 * 8;
+  idle->tss.ss = 1 * 8;
+  idle->tss.ds = 1 * 8;
+  idle->tss.fs = 1 * 8;
+  idle->tss.gs = 1 * 8;
+  task_run(idle, MAX_TASKLEVELS - 1, 1);
+  
   return task;
 }
+
 
 struct TASK *task_alloc(void)
 {
