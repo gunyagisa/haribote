@@ -9,6 +9,8 @@
 #include "sheet.h"
 #include "dsctbl.h"
 
+void console_task(struct SHEET *);
+
 void make_window8(unsigned char *buf, int xsize, int ysize, char *title, char act)
 {
   static char closebtn[14][16] = {
@@ -100,10 +102,10 @@ void HariMain(void)
   struct MOUSE_DEC mdec;
   struct MEMMAN *memman = (struct MEMMAN *) MEMMAN_ADDR;
   struct SHTCTL *shtctl;
-  struct SHEET *sht_back, *sht_mouse, *sht_win, *sht_win_b[3];
-  unsigned char *buf_back, buf_mouse[256], *buf_win, *buf_win_b;
+  struct SHEET *sht_back, *sht_mouse, *sht_win, *sht_cons;
+  unsigned char *buf_back, buf_mouse[256], *buf_win, *buf_cons;
 
-  struct TASK *task_a, *task_b[3];
+  struct TASK *task_a, *task_cons;
   struct TIMER *timer;
 
   static char keytable[0x54] = {
@@ -162,6 +164,25 @@ void HariMain(void)
   timer_init(timer, &fifo, 1);
   settimer(timer, 50);
 
+  // sht_cons
+  sht_cons = sheet_alloc(shtctl);
+  buf_cons = (unsigned char *) memman_alloc_4k(memman, 256 * 165);
+  sheet_setbuf(sht_cons, buf_cons, 256, 165, -1);
+  make_window8(buf_cons, 256, 165, "console", 0);
+  make_textbox8(sht_cons, 8, 28, 240, 128, COL8_000000);
+  task_cons = task_alloc();
+  task_cons->tss.esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024 - 8;
+  task_cons->tss.eip = (int) &console_task;
+  task_cons->tss.es = 1 * 8;
+  task_cons->tss.cs = 2 * 8;
+  task_cons->tss.ss = 1 * 8;
+  task_cons->tss.ds = 1 * 8;
+  task_cons->tss.fs = 1 * 8;
+  task_cons->tss.gs = 1 * 8;
+  *((int *) task_cons->tss.esp + 4) = (int) sht_cons;
+  task_run(task_cons, 2, 2);
+
+
   // sht_mouse
   sht_mouse = sheet_alloc(shtctl);
   sheet_setbuf(sht_mouse, buf_mouse, 16, 16, 99);
@@ -170,17 +191,13 @@ void HariMain(void)
   my = (binfo->scrny - 28 - 16) / 2;
 
   sheet_slide(sht_back, 0, 0);
-  sheet_slide(sht_win_b[0], 168, 56);
-  sheet_slide(sht_win_b[1], 8, 116);
-  sheet_slide(sht_win_b[2], 168, 116);
+  sheet_slide(sht_cons, 32, 4);
   sheet_slide(sht_win, 8, 56);
   sheet_slide(sht_mouse, mx, my);
   sheet_updown(sht_back, 0);
-  sheet_updown(sht_win_b[0], 1);
-  sheet_updown(sht_win_b[1], 2);
-  sheet_updown(sht_win_b[2], 3);
-  sheet_updown(sht_win, 4);
-  sheet_updown(sht_mouse, 5);
+  sheet_updown(sht_cons, 1);
+  sheet_updown(sht_win, 2);
+  sheet_updown(sht_mouse, 3);
   sprintf(s, "(%d, %d)", mx, my);
   str_renderer_sht(sht_back, 0, 0, COL8_FFFFFF, COL8_008484, s, 10);
   sprintf(s, "Memory Size: %dMB  free: %dKB", memtotal / (1024 * 1024), memman_total(memman) / 1024);
@@ -259,3 +276,41 @@ void HariMain(void)
     }
   }
 }
+
+void console_task(struct SHEET *sht)
+{
+  struct FIFO32 fifo;
+  struct TIMER *timer;
+  struct TASK *task = task_now();
+  int i, fifobuf[128], cursor_x = 8, cursor_c = COL8_000000;
+  
+  fifo32_init(&fifo, 128, fifobuf, task);
+
+  timer = timer_alloc();
+  timer_init(timer, &fifo, 1);
+  settimer(timer, 50);
+
+  for (;;) {
+    io_cli();
+    if (fifo32_status(&fifo) == 0) {
+      task_sleep(task);
+      io_sti();
+    } else {
+      i = fifo32_get(&fifo);
+      io_sti();
+      if ( i <= 1) {
+        if (i != 0) {
+          timer_init(timer, &fifo, 0);
+          cursor_c = COL8_FFFFFF;
+        } else {
+          timer_init(timer, &fifo, 1);
+          cursor_c = COL8_000000;
+        }
+        settimer(timer, 50);
+        boxfill8(sht->buf, sht->bxsize, cursor_c, cursor_x, 28, cursor_x + 7, 43);
+        sheet_refresh(sht, cursor_x, 28, cursor_x + 8, 44);
+      }
+    }
+  }
+}
+
