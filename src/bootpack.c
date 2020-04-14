@@ -54,7 +54,7 @@ void make_wtitle8(unsigned char *buf, int xsize, char *title, char act)
     tbc = COL8_848484;
   }
   boxfill8(buf, xsize, tbc, 3, 3,xsize - 4, 20);
-  str_renderer8(buf, xsize, 24, 4, tbc, title);
+  str_renderer8(buf, xsize, tc, 24, 4, title);
   for ( int y = 0;y < 14;++y) {
     for (int x = 0;x < 16;++x) {
       c = closebtn[y][x];
