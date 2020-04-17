@@ -133,7 +133,7 @@ void HariMain(void)
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, '_', 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', 0, 0
   };
-  int key_shift = 0, key_to = 0;
+  int key_shift = 0, key_to = 0, key_leds = (binfo->leds >> 4) & 7;
 
 
   unsigned int memtotal;
@@ -241,7 +241,11 @@ void HariMain(void)
         } else {
           s[0] = 0;
         }
-
+        if ('A' <= s[0] && s[0] <= 'Z') {
+          if (((key_leds & 4) == 0 && key_shift == 0) || ((key_leds & 4) != 0 && key_shift != 0)) {
+            s[0] += 0x20;
+          }
+        }
         if (s[0] != 0) {
           if (key_to == 0) {
             if (cursor_x < 128) {
