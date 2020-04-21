@@ -29,9 +29,7 @@ void make_window8(unsigned char *buf, int xsize, int ysize, char *title, char ac
 }
 
 void make_wtitle8(unsigned char *buf, int xsize, char *title, char act)
-{
-  static char closebtn[14][16] = {
-    "00000000000000$@",
+{ static char closebtn[14][16] = { "00000000000000$@",
     "0QQQQQQQQQQQQQ$@",
     "0QQQQQQQQQQQQQ$@", 
     "0QQQ@@QQQQ@@QQ$@", 
@@ -438,16 +436,28 @@ void console_task(struct SHEET *sht)
       if (256 <= i && i <= 511) {
         if (i == 8 + 256) { // backspace
           if (cursor_x > 16) {
-            str_renderer_sht(sht, cursor_x, 28, COL8_FFFFFF, COL8_000000, " ", 1);
+            str_renderer_sht(sht, cursor_x, cursor_y, COL8_FFFFFF, COL8_000000, " ", 1);
             cursor_x -= 8;
           }
         } else if (i == 10 + 256) {
+          str_renderer_sht(sht, cursor_x, cursor_y, COL8_FFFFFF, COL8_000000, " ", 1);
           if (cursor_y < 28 + 112) {
-            str_renderer_sht(sht, cursor_x, cursor_y, COL8_FFFFFF, COL8_000000, " ", 1);
             cursor_y += 16;
-            str_renderer_sht(sht, 8, cursor_y, COL8_FFFFFF, COL8_000000, ">", 1);
-            cursor_x = 16;
+          } else {
+            for (int y = 28;y < 28 + 112;y++) {
+              for (int x = 8;x < 8 + 240;x++) {
+                sht->buf[x + y * sht->bxsize] = sht->buf[x + (y + 16) * sht->bxsize];
+              }
+            }
+            for (int y = 28 + 112;y < 28 + 128;y++) {
+              for (int x = 8;x < 8 + 240;x++) {
+                sht->buf[x + y * sht->bxsize] = COL8_000000;
+              }
+            }
+            sheet_refresh(sht, 8, 28, 8 + 240, 28 + 128);
           }
+          str_renderer_sht(sht, 8, cursor_y, COL8_FFFFFF, COL8_000000, ">", 1);
+          cursor_x = 16;
         } else {
           if (cursor_x < 240) {
             s[0] = i - 256;
