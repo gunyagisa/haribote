@@ -9,6 +9,8 @@
 #include "sheet.h"
 #include "dsctbl.h"
 
+#define KEYCMD_LED      0xed
+
 void console_task(struct SHEET *);
 void make_wtitle8(unsigned char *, int, char *, char);
 
@@ -100,8 +102,8 @@ void HariMain(void)
 
   struct BOOTINFO *binfo = (BOOTINFO *) BOOTINFO_ADDR;
   char s[40];
-  struct FIFO32 fifo;
-  int fifobuf[128];
+  struct FIFO32 fifo, keycmd;
+  int fifobuf[128], keycmd_buf[32];
   int mx, my, d;
   struct MOUSE_DEC mdec;
   struct MEMMAN *memman = (struct MEMMAN *) MEMMAN_ADDR;
@@ -133,7 +135,7 @@ void HariMain(void)
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, '_', 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', 0, 0
   };
-  int key_shift = 0, key_to = 0, key_leds = (binfo->leds >> 4) & 7;
+  int key_shift = 0, key_to = 0, key_leds = (binfo->leds >> 4) & 7, keycmd_wait = -1;
 
 
   unsigned int memtotal;
@@ -142,6 +144,7 @@ void HariMain(void)
   init_pic();
   io_sti();
   fifo32_init(&fifo, 128, fifobuf, 0);
+  fifo32_init(&keycmd, 32, keycmd_buf, 0);
 
   init_pit();         // PIT configure
 
@@ -222,6 +225,11 @@ void HariMain(void)
   str_renderer_sht(sht_back, 0, 32, COL8_FFFFFF, COL8_008484, s, 40);
 
   for (;;) {
+    if (fifo32_status(&keycmd) > 0 && keycmd_wait < 0) {
+      keycmd_wait = fifo32_get(&keycmd);
+      wait_KBC_sendready();
+      io_out8(PORT_KEYDATA, keycmd_wait);
+    }
     io_cli();
     if (fifo32_status(&fifo) == 0) {
       task_sleep(task_a);
@@ -281,6 +289,28 @@ void HariMain(void)
           }
           sheet_refresh(sht_win, 0,0, sht_win->bxsize, 21);
           sheet_refresh(sht_cons, 0, 0, sht_cons->bxsize, 21);
+        }
+        if (d == 256 + 0x3a) { // capslock
+          key_leds ^= 4;
+          fifo32_put(&keycmd, KEYCMD_LED);
+          fifo32_put(&keycmd, key_leds);
+        }
+        if (d == 256 + 0x45) { //numlock
+          key_leds ^= 2;
+          fifo32_put(&keycmd, KEYCMD_LED);
+          fifo32_put(&keycmd, key_leds);
+        }
+        if (d == 256 + 0x46) { // scrolllock
+          key_leds ^= 1;
+          fifo32_put(&keycmd, KEYCMD_LED);
+          fifo32_put(&keycmd, key_leds);
+        }
+        if (d == 256 + 0xfa) { // key data was accepted
+          keycmd_wait = -1;
+        }
+        if (d == 256 + 0xfe) { // key data was not accepted
+          wait_KBC_sendready();
+          io_out8(PORT_KEYDATA, keycmd_wait);
         }
         if (d == 256 + 0x2a) {
           key_shift |= 1;
