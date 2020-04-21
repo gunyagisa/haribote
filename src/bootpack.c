@@ -329,11 +329,15 @@ void HariMain(void)
         if (d == 256 + 0xb6) {
           key_shift &= ~2;
         }
+        if (d == 256 + 0x1c) { // Enter
+          if (key_to != 0) {
+            fifo32_put(&task_cons->fifo, 10 + 256);
+          }
+        }
         if (cursor_c >= 0) {
           boxfill8(sht_win->buf, sht_win->bxsize, cursor_c, cursor_x, 28, cursor_x + 7, 43);
         }
         sheet_refresh(sht_win, cursor_x, 28, cursor_x+8, 44);
-
       } else if (512 <= d && d <= 767) { //mouse
         if (mouse_decode(&mdec, d - 512) != 0) {
           sprintf(s, "[lcr %d %d]", mdec.x, mdec.y);
@@ -391,7 +395,7 @@ void console_task(struct SHEET *sht)
 {
   struct TIMER *timer;
   struct TASK *task = task_now();
-  int i, fifobuf[128], cursor_x = 16, cursor_c = -1;
+  int i, fifobuf[128], cursor_x = 16, cursor_y = 28, cursor_c = -1;
   char s[2];
   
   fifo32_init(&task->fifo, 128, fifobuf, task);
@@ -437,17 +441,26 @@ void console_task(struct SHEET *sht)
             str_renderer_sht(sht, cursor_x, 28, COL8_FFFFFF, COL8_000000, " ", 1);
             cursor_x -= 8;
           }
+        } else if (i == 10 + 256) {
+          if (cursor_y < 28 + 112) {
+            str_renderer_sht(sht, cursor_x, cursor_y, COL8_FFFFFF, COL8_000000, " ", 1);
+            cursor_y += 16;
+            str_renderer_sht(sht, 8, cursor_y, COL8_FFFFFF, COL8_000000, ">", 1);
+            cursor_x = 16;
+          }
         } else {
           if (cursor_x < 240) {
             s[0] = i - 256;
             s[1] = 0;
-            str_renderer_sht(sht, cursor_x, 28,  COL8_FFFFFF, COL8_000000, s, 1);
+            str_renderer_sht(sht, cursor_x, cursor_y,  COL8_FFFFFF, COL8_000000, s, 1);
             cursor_x += 8;
           }
         }
       }
-      boxfill8(sht->buf, sht->bxsize, cursor_c, cursor_x, 28, cursor_x + 7, 43);
-      sheet_refresh(sht, cursor_x, 28, cursor_x + 8, 44);
+      if (cursor_c >= 0) {
+        boxfill8(sht->buf, sht->bxsize, cursor_c, cursor_x, cursor_y, cursor_x + 7, cursor_y + 15);
+      }
+      sheet_refresh(sht, cursor_x, cursor_y, cursor_x + 8, cursor_y + 16);
     }
   }
 }
