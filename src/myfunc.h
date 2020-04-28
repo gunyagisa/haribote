@@ -117,7 +117,7 @@ int sprintf(char *str, const char *fmt, ...)
   return len;
 }
 
-unsigned long strlen(const char *s)
+unsigned int strlen(const char *s)
 {
   int i = 0;
   while (*s != 0) {
@@ -128,7 +128,7 @@ unsigned long strlen(const char *s)
 }
 
 
-int strncmp(const char *s1, const char *s2, unsigned long n)
+int strncmp(const char *s1, const char *s2, unsigned int n)
 {
   for (int i = 0; i < n; ++i) {
     if (*s1 == *s2) {
