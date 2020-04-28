@@ -11,7 +11,8 @@
 
 
 #define KEYCMD_LED      0xed
-void console_task(struct SHEET *, unsigned int); int cons_newline(int , struct SHEET *);
+void console_task(struct SHEET *, unsigned int); 
+int cons_newline(int , struct SHEET *);
 void make_wtitle8(unsigned char *, int, char *, char);
 
 void make_window8(unsigned char *buf, int xsize, int ysize, char *title, char act)
@@ -526,13 +527,30 @@ type_next_file:
               for (x = 0; x < y; x++) {
                 s[0] = p[x];
                 s[1] = 0;
-                str_renderer_sht(sht, cursor_x, cursor_y, COL8_FFFFFF, COL8_000000, s, 1);
-                cursor_x += 8;
-                if (cursor_x == 8 + 240) {
+                if (s[0] == 0x09) { // tab
+                  for (;;) {
+                    str_renderer_sht(sht, cursor_x, cursor_y, COL8_FFFFFF, COL8_000000, " ", 1);
+                    cursor_x += 8;
+                    if (cursor_x == 8 + 240) {
+                      cursor_x = 8;
+                      cursor_y = cons_newline(cursor_y, sht);
+                    }
+                    if (((cursor_x - 8) & 0x1f) == 0) break;
+                  }
+                } else if (s[0] == 0x0a) { // kaigyou
                   cursor_x = 8;
                   cursor_y = cons_newline(cursor_y, sht);
+                } else if (s[0] == 0x0d) { // carriage return
+                  // nothing
+                } else {
+                  str_renderer_sht(sht, cursor_x, cursor_y, COL8_FFFFFF, COL8_000000, s, 1);
+                  cursor_x += 8;
+                  if (cursor_x == 8 + 240) {
+                    cursor_x = 8;
+                    cursor_y = cons_newline(cursor_y, sht);
+                  }
                 }
-              } 
+              }
             } else {
                 str_renderer_sht(sht, 8, cursor_y, COL8_FFFFFF, COL8_000000, "File not found.", 15);
                 cursor_y = cons_newline(cursor_y, sht);
