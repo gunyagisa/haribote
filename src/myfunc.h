@@ -103,6 +103,7 @@ int vsprintf(char *str, const char *fmt, va_list arg)
   return len;
 }
 
+
 int sprintf(char *str, const char *fmt, ...)
 {
   va_list arg;
@@ -116,15 +117,30 @@ int sprintf(char *str, const char *fmt, ...)
   return len;
 }
 
-int strcmp(const char *s1, const char *s2)
+unsigned long strlen(const char *s)
 {
-  while (*s2 != 0) {
+  int i = 0;
+  while (*s != 0) {
+    ++i;
+    ++s;
+  }
+  return i;
+}
+
+
+int strncmp(const char *s1, const char *s2, unsigned long n)
+{
+  for (int i = 0; i < n; ++i) {
     if (*s1 == *s2) {
       s1++;
       s2++;
-      continue;
+    } else {
+      return *s1 - *s2;
     }
-    return *s1 - *s2;
   }
   return 0;
+}
+int strcmp(const char *s1, const char *s2)
+{
+  return strncmp(s1, s2, strlen(s2));
 }

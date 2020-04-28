@@ -487,7 +487,7 @@ void console_task(struct SHEET *sht, unsigned int memtotal)
                 }
               }
             }
-          } else if (cmdline[0] == 'c' && cmdline[1] == 'a' && cmdline[2] == 't' && cmdline[3] == ' ') {
+          } else if (strncmp(cmdline, "cat ", 4) == 0) {
             int y;
             int x;
             for (y = 0;y < 11;++y) {
@@ -600,5 +600,3 @@ int cons_newline(int cursor_y, struct SHEET *sheet)
   }
   return cursor_y;
 }
-
-
