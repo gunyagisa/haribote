@@ -22,7 +22,7 @@ $(BUILD)nasmfunc.o: $(SRC)nasmfunc.asm Makefile
 	nasm -f elf32 -o $@ $<
 
 $(BUILD)bootpack.bin: $(addprefix $(BUILD), $(OBJ)) Makefile
-	ld -m elf_i386  -e HariMain -o $(BUILD)bootpack.bin $(addprefix $(BUILD), $(OBJ)) -T har.ld
+	ld -m elf_i386  -e HariMain -o $(BUILD)bootpack.bin $(addprefix $(BUILD), $(OBJ)) -T har.ld -static
 
 $(BUILD)geocide.sys: $(BUILD)asmhead.bin $(BUILD)bootpack.bin Makefile 
 	cat $< $(BUILD)bootpack.bin > $@

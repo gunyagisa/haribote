@@ -4,14 +4,16 @@
 #include "interrupt.h"
 #include "mouse.h"
 #include "keyboard.h"
-#include "mysprintf.h" 
+#include "myfunc.h" 
 #include "memory.h"
 #include "sheet.h"
 #include "dsctbl.h"
 
+
 #define KEYCMD_LED      0xed
 
-void console_task(struct SHEET *);
+void console_task(struct SHEET *, unsigned int);
+int cons_newline(int , struct SHEET *);
 void make_wtitle8(unsigned char *, int, char *, char);
 
 void make_window8(unsigned char *buf, int xsize, int ysize, char *title, char act)
@@ -190,7 +192,7 @@ void HariMain(void)
   make_window8(buf_cons, 256, 165, "console", 0);
   make_textbox8(sht_cons, 8, 28, 240, 128, COL8_000000);
   task_cons = task_alloc();
-  task_cons->tss.esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024 - 8;
+  task_cons->tss.esp = memman_alloc_4k(memman, 64 * 1024) + 64 * 1024 - 12;
   task_cons->tss.eip = (int) &console_task;
   task_cons->tss.es = 1 * 8;
   task_cons->tss.cs = 2 * 8;
@@ -199,6 +201,7 @@ void HariMain(void)
   task_cons->tss.fs = 1 * 8;
   task_cons->tss.gs = 1 * 8;
   *((int *) (task_cons->tss.esp + 4)) = (int) sht_cons;
+  *((int *) (task_cons->tss.esp + 8)) = memtotal;
   task_run(task_cons, 2, 2);
 
 
@@ -389,12 +392,13 @@ void HariMain(void)
   }
 }
 
-void console_task(struct SHEET *sht)
+void console_task(struct SHEET *sht, unsigned int memtotal)
 {
   struct TIMER *timer;
   struct TASK *task = task_now();
   int i, fifobuf[128], cursor_x = 16, cursor_y = 28, cursor_c = -1;
-  char s[2];
+  char s[30], cmdline[30];
+  struct MEMMAN *memman = (struct MEMMAN *) MEMMAN_ADDR;
   
   fifo32_init(&task->fifo, 128, fifobuf, task);
 
@@ -441,20 +445,20 @@ void console_task(struct SHEET *sht)
           }
         } else if (i == 10 + 256) {
           str_renderer_sht(sht, cursor_x, cursor_y, COL8_FFFFFF, COL8_000000, " ", 1);
-          if (cursor_y < 28 + 112) {
-            cursor_y += 16;
-          } else {
-            for (int y = 28;y < 28 + 112;y++) {
-              for (int x = 8;x < 8 + 240;x++) {
-                sht->buf[x + y * sht->bxsize] = sht->buf[x + (y + 16) * sht->bxsize];
-              }
-            }
-            for (int y = 28 + 112;y < 28 + 128;y++) {
-              for (int x = 8;x < 8 + 240;x++) {
-                sht->buf[x + y * sht->bxsize] = COL8_000000;
-              }
-            }
-            sheet_refresh(sht, 8, 28, 8 + 240, 28 + 128);
+          cmdline[cursor_x / 8 - 2] = 0;
+          cursor_y = cons_newline(cursor_y, sht);
+          if (strcmp(cmdline, "mem") == 0) {
+            sprintf(s, "total %dMB", memtotal / (1024 * 1024));
+            str_renderer_sht(sht, 8, cursor_y, COL8_FFFFFF, COL8_000000, s, 30);
+            cursor_y = cons_newline(cursor_y, sht);
+            sprintf(s, "free %dMB", memman_total(memman) / 1024);
+            str_renderer_sht(sht, 8, cursor_y, COL8_FFFFFF, COL8_000000, s, 30);
+            cursor_y = cons_newline(cursor_y, sht);
+            cursor_y = cons_newline(cursor_y, sht);
+          } else if (cmdline[0] != 0) {
+            str_renderer_sht(sht, 8, cursor_y, COL8_FFFFFF, COL8_000000, "Bad command.", 12);
+            cursor_y = cons_newline(cursor_y, sht);
+            cursor_y = cons_newline(cursor_y, sht);
           }
           str_renderer_sht(sht, 8, cursor_y, COL8_FFFFFF, COL8_000000, ">", 1);
           cursor_x = 16;
@@ -462,6 +466,7 @@ void console_task(struct SHEET *sht)
           if (cursor_x < 240) {
             s[0] = i - 256;
             s[1] = 0;
+            cmdline[cursor_x / 8 - 2] = i - 256;
             str_renderer_sht(sht, cursor_x, cursor_y,  COL8_FFFFFF, COL8_000000, s, 1);
             cursor_x += 8;
           }
@@ -474,4 +479,25 @@ void console_task(struct SHEET *sht)
     }
   }
 }
+
+int cons_newline(int cursor_y, struct SHEET *sheet)
+{
+  if (cursor_y < 28 + 112) {
+    cursor_y += 16;
+  } else {
+    for (int y = 28;y < 28 + 112;y++) {
+      for (int x = 8;x < 8 + 240;x++) {
+        sheet->buf[x + y * sheet->bxsize] = sheet->buf[x + (y + 16) * sheet->bxsize];
+      }
+    }
+    for (int y = 28 + 112;y < 28 + 128;y++) {
+      for (int x = 8; x < 8 + 240;x++) {
+        sheet->buf[x + y * sheet->bxsize] = COL8_000000;
+      }
+    }
+    sheet_refresh(sheet, 8, 28, 8 + 240, 28 + 128);
+  }
+  return cursor_y;
+}
+
 

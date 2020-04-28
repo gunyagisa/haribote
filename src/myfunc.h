@@ -115,3 +115,16 @@ int sprintf(char *str, const char *fmt, ...)
 
   return len;
 }
+
+int strcmp(const char *s1, const char *s2)
+{
+  while (*s2 != 0) {
+    if (*s1 == *s2) {
+      s1++;
+      s2++;
+      continue;
+    }
+    return *s1 - *s2;
+  }
+  return 0;
+}
