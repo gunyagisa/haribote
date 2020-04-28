@@ -30,6 +30,9 @@ $(BUILD)geocide.sys: $(BUILD)asmhead.bin $(BUILD)bootpack.bin Makefile
 $(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys Makefile
 	mformat -f 1440 -C -B $< -i $@ ::
 	mcopy $(BUILD)geocide.sys -i $@ ::
+	mcopy $(SRC)ipl.asm -i $@ ::
+	mcopy ./Makefile -i $@ ::
+
 
 
 run: $(BUILD)geocide.img

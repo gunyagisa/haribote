@@ -3,6 +3,7 @@
 #include "memory.h"
 
 #define BOOTINFO_ADDR 	0x00000ff0
+#define DISKIMG_ADDR    0x00100000
 
 #define EFLAGS_AC_BIT           0x00040000
 #define CR0_CACHE_DISABLE       0x60000000
