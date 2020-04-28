@@ -455,6 +455,14 @@ void console_task(struct SHEET *sht, unsigned int memtotal)
             str_renderer_sht(sht, 8, cursor_y, COL8_FFFFFF, COL8_000000, s, 30);
             cursor_y = cons_newline(cursor_y, sht);
             cursor_y = cons_newline(cursor_y, sht);
+          } else if (strcmp(cmdline, "cls") == 0) {
+            for (int y = 28;y < 28 + 128;++y) {
+              for (int x = 8;x < 8 + 240;x++) {
+                sht->buf[x + y * sht->bxsize] = COL8_000000;
+              }
+            }
+            sheet_refresh(sht, 8, 28, 8 + 240, 28 + 128);
+            cursor_y = 28;
           } else if (cmdline[0] != 0) {
             str_renderer_sht(sht, 8, cursor_y, COL8_FFFFFF, COL8_000000, "Bad command.", 12);
             cursor_y = cons_newline(cursor_y, sht);
