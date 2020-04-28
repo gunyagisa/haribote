@@ -11,9 +11,7 @@
 
 
 #define KEYCMD_LED      0xed
-
-void console_task(struct SHEET *, unsigned int);
-int cons_newline(int , struct SHEET *);
+void console_task(struct SHEET *, unsigned int); int cons_newline(int , struct SHEET *);
 void make_wtitle8(unsigned char *, int, char *, char);
 
 void make_window8(unsigned char *buf, int xsize, int ysize, char *title, char act)
@@ -404,7 +402,7 @@ void console_task(struct SHEET *sht, unsigned int memtotal)
   struct TIMER *timer;
   struct TASK *task = task_now();
   int i, fifobuf[128], cursor_x = 16, cursor_y = 28, cursor_c = -1;
-  char s[30], cmdline[30];
+  char s[30], cmdline[30], *p;
   struct MEMMAN *memman = (struct MEMMAN *) MEMMAN_ADDR;
   struct FILEINFO *finfo = (struct FILEINFO *) (DISKIMG_ADDR + 0x002600);
   
@@ -488,13 +486,65 @@ void console_task(struct SHEET *sht, unsigned int memtotal)
                 }
               }
             }
-          } else if (cmdline[0] != 0) {
-            str_renderer_sht(sht, 8, cursor_y, COL8_FFFFFF, COL8_000000, "Bad command.", 12);
-            cursor_y = cons_newline(cursor_y, sht);
-            cursor_y = cons_newline(cursor_y, sht);
-          }
-          str_renderer_sht(sht, 8, cursor_y, COL8_FFFFFF, COL8_000000, ">", 1);
-          cursor_x = 16;
+          } else if (cmdline[0] == 'c' && cmdline[1] == 'a' && cmdline[2] == 't' && cmdline[3] == ' ') {
+            int y;
+            int x;
+            for (y = 0;y < 11;++y) {
+              s[y] = ' ';
+            }
+            y = 0;
+            for (int x = 4; y < 11 && cmdline[x] != 0 ; x++) {
+              if (cmdline[x] == '.' && y <= 8) {
+                y = 8;
+              } else {
+                s[y] = cmdline[x];
+                if ('a' <= s[y] && s[y] <= 'z') {
+                  s[y] -= 0x20;
+                }
+                y++;
+              }
+            }
+            for (x = 0; x < 224;) {
+              if (finfo[x].name[0] == 0x00) {
+                break;
+              }
+              if ((finfo[x].type & 0x18) == 0) {
+                for (y = 0;y < 11;y++) {
+                  if (finfo[x].name[y] != s[y]) {
+                    goto type_next_file;
+                  }
+                }
+                break;
+              }
+type_next_file:
+              x++;
+            }
+            if (x < 224 && finfo[x].name[0] != 0x00) {
+              y = finfo[x].size;
+              p = (char *) (finfo[x].clustno * 512 + 0x003e00 + DISKIMG_ADDR);
+              cursor_x = 8;
+              for (x = 0; x < y; x++) {
+                s[0] = p[x];
+                s[1] = 0;
+                str_renderer_sht(sht, cursor_x, cursor_y, COL8_FFFFFF, COL8_000000, s, 1);
+                cursor_x += 8;
+                if (cursor_x == 8 + 240) {
+                  cursor_x = 8;
+                  cursor_y = cons_newline(cursor_y, sht);
+                }
+              } 
+            } else {
+                str_renderer_sht(sht, 8, cursor_y, COL8_FFFFFF, COL8_000000, "File not found.", 15);
+                cursor_y = cons_newline(cursor_y, sht);
+              }
+              cursor_y = cons_newline(cursor_y, sht);
+            } else if (cmdline[0] != 0) {
+              str_renderer_sht(sht, 8, cursor_y, COL8_FFFFFF, COL8_000000, "Bad command.", 12);
+              cursor_y = cons_newline(cursor_y, sht);
+              cursor_y = cons_newline(cursor_y, sht);
+            }
+            str_renderer_sht(sht, 8, cursor_y, COL8_FFFFFF, COL8_000000, ">", 1);
+            cursor_x = 16;
         } else {
           if (cursor_x < 240) {
             s[0] = i - 256;
