@@ -22,17 +22,21 @@ $(BUILD)nasmfunc.o: $(SRC)nasmfunc.asm Makefile
 	nasm -f elf32 -o $@ $<
 
 $(BUILD)bootpack.bin: $(addprefix $(BUILD), $(OBJ)) Makefile
-	ld -m elf_i386  -e HariMain -o $(BUILD)bootpack.bin $(addprefix $(BUILD), $(OBJ)) -T har.ld -static
+	ld -m elf_i386  -e HariMain -o $(BUILD)bootpack.bin $(addprefix $(BUILD), $(OBJ)) -T har.ld
 
 $(BUILD)geocide.sys: $(BUILD)asmhead.bin $(BUILD)bootpack.bin Makefile 
 	cat $< $(BUILD)bootpack.bin > $@
 
-$(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys Makefile
+$(BUILD)hlt.hrb: $(SRC)hlt.asm
+	nasm -f elf32 -o $(BUILD)hlt.o $<
+	ld -m elf_i386 -T har.ld -o $@ $(BUILD)hlt.o
+
+$(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys $(BUILD)hlt.hrb Makefile
 	mformat -f 1440 -C -B $< -i $@ ::
 	mcopy $(BUILD)geocide.sys -i $@ ::
 	mcopy $(SRC)ipl.asm -i $@ ::
 	mcopy ./Makefile -i $@ ::
-	mcopy src/hlt.asm -i $@ ::
+	mcopy ./build-cache/hlt.hrb -i $@ ::
 
 
 

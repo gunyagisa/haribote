@@ -1,6 +1,9 @@
 ; hlt.asm
 bits 32
 
-fin:
+section .text
+global HariMain
+
+HariMain:
   hlt
-  jmp   fin
+  jmp   HariMain
