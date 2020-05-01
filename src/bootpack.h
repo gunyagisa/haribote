@@ -1,6 +1,7 @@
 #pragma once
 
 #include "memory.h"
+#include "sheet.h"
 
 #define BOOTINFO_ADDR 	0x00000ff0
 #define DISKIMG_ADDR    0x00100000
@@ -13,7 +14,6 @@
 #define MAX_TIMER       500
 
 #include "fifo.h"
-
 // nasmfunc.asm
 void io_hlt(void);
 void io_cli(void), io_sti(void), io_stihlt(void);
@@ -99,3 +99,12 @@ void task_switchsub(void);
 void task_remove(struct TASK *);
 void task_add(struct TASK *);
 struct TASK * task_now(void);
+
+// window.c
+void make_wtitle8(unsigned char *, int, char *, char);
+void make_window8(unsigned char *, int, int , char *, char);
+
+// console.c
+void console_task(struct SHEET *, unsigned int); 
+int cons_newline(int , struct SHEET *);
+
