@@ -103,6 +103,8 @@ struct TASK * task_now(void);
 // window.c
 void make_wtitle8(unsigned char *, int, char *, char);
 void make_window8(unsigned char *, int, int , char *, char);
+void make_textbox8(struct SHEET *, int, int ,int , int, int);
+void str_renderer_sht(struct SHEET *, int, int , int, int, char *, int);
 
 // console.c
 void console_task(struct SHEET *, unsigned int); 
