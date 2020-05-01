@@ -2,6 +2,8 @@
 
 #include "memory.h"
 #include "sheet.h"
+#include "fifo.h"
+#include "graphic.h"
 
 #define BOOTINFO_ADDR 	0x00000ff0
 #define DISKIMG_ADDR    0x00100000
@@ -13,7 +15,6 @@
 
 #define MAX_TIMER       500
 
-#include "fifo.h"
 // nasmfunc.asm
 void io_hlt(void);
 void io_cli(void), io_sti(void), io_stihlt(void);
@@ -109,4 +110,25 @@ void str_renderer_sht(struct SHEET *, int, int , int, int, char *, int);
 // console.c
 void console_task(struct SHEET *, unsigned int); 
 int cons_newline(int , struct SHEET *);
+
+// file.c
+struct FILEINFO {
+  unsigned char name[8], ext[3], type;
+  char reserve[10];
+  unsigned short time, date, clustno;
+  unsigned int size;
+};
+void file_readfat(int *, unsigned char *);
+void file_loadfile(int ,int ,char * , int *, char *);
+
+// myfunc.c
+void str_reverse(char *, int);
+int decimal(int , char *, int , int);
+int hex(unsigned int, char *, int, int );
+int string (const char *, char *, int, int );
+int vsprintf(char *, const char *, __builtin_va_list);
+int sprintf(char *, const char *, ...);
+unsigned int strlen(const char *);
+int strncmp(const char *, const char *, unsigned int);
+int strcmp(const char *, const char *);
 

@@ -5,5 +5,7 @@ section .text
 global HariMain
 
 HariMain:
+  cli
+fin:
   hlt
-  jmp   HariMain
+  jmp   fin
