@@ -108,8 +108,18 @@ void make_textbox8(struct SHEET *, int, int ,int , int, int);
 void str_renderer_sht(struct SHEET *, int, int , int, int, char *, int);
 
 // console.c
+struct CONSOLE {
+  struct SHEET *sht;
+  int cur_x, cur_y, cur_c;
+};
 void console_task(struct SHEET *, unsigned int); 
-int cons_newline(int , struct SHEET *);
+void cons_newline(struct CONSOLE *); 
+void cons_runcmd(char *, struct CONSOLE *, int *, unsigned int);
+void cmd_mem(struct CONSOLE *cons, unsigned int memtotal);
+void cmd_clear(struct CONSOLE *cons);
+void cmd_ls(struct CONSOLE *cons);
+void cmd_cat(struct CONSOLE *cons, int *fat, char *cmdline);
+void cmd_hlt(struct CONSOLE *cons, int *fat);
 
 // file.c
 struct FILEINFO {
@@ -120,6 +130,7 @@ struct FILEINFO {
 };
 void file_readfat(int *, unsigned char *);
 void file_loadfile(int ,int ,char * , int *, char *);
+struct FILEINFO * file_search(char *cmdline, struct FILEINFO *finfo, int max);
 
 // myfunc.c
 void str_reverse(char *, int);
