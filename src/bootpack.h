@@ -1,6 +1,6 @@
 #pragma once
 
-#include "memory.h"
+#include "memory.h" 
 #include "sheet.h"
 #include "fifo.h"
 #include "graphic.h"
@@ -120,7 +120,7 @@ void cmd_mem(struct CONSOLE *cons, unsigned int memtotal);
 void cmd_clear(struct CONSOLE *cons);
 void cmd_ls(struct CONSOLE *cons);
 void cmd_cat(struct CONSOLE *cons, int *fat, char *cmdline);
-void cmd_hlt(struct CONSOLE *cons, int *fat);
+int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline);
 
 // file.c
 struct FILEINFO {

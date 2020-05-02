@@ -27,16 +27,16 @@ $(BUILD)bootpack.bin: $(addprefix $(BUILD), $(OBJ)) Makefile
 $(BUILD)geocide.sys: $(BUILD)asmhead.bin $(BUILD)bootpack.bin Makefile 
 	cat $< $(BUILD)bootpack.bin > $@
 
-$(BUILD)hlt.hrb: $(SRC)hlt.asm
-	nasm -f elf32 -o $(BUILD)hlt.o $<
-	ld -m elf_i386 -T binary.ld -o $@ $(BUILD)hlt.o
+$(BUILD)hello.hrb: $(SRC)hello.asm
+	nasm -f elf32 -o $(BUILD)hello.o $<
+	ld -m elf_i386 -T binary.ld -o $@ $(BUILD)hello.o
 
-$(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys $(BUILD)hlt.hrb Makefile
+$(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys $(BUILD)hello.hrb Makefile
 	mformat -f 1440 -C -B $< -i $@ ::
 	mcopy $(BUILD)geocide.sys -i $@ ::
 	mcopy $(SRC)ipl.asm -i $@ ::
 	mcopy ./Makefile -i $@ ::
-	mcopy ./build-cache/hlt.hrb -i $@ ::
+	mcopy ./build-cache/hello.hrb -i $@ ::
 
 
 

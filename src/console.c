@@ -43,12 +43,12 @@ void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, unsigned int mem
     cmd_ls(cons);
   } else if (strncmp(cmdline, "cat ", 4) == 0) {
     cmd_cat(cons, fat, cmdline);
-  } else if (strcmp(cmdline, "hlt") == 0) {
-    cmd_hlt(cons, fat);
   } else if (cmdline[0] != 0) {
-    str_renderer_sht(cons->sht, cons->cur_x, cons->cur_y, COL8_FFFFFF, COL8_000000, "Bad command", 11);
-    cons_newline(cons);
-    cons_newline(cons);
+    if (cmd_app(cons, fat, cmdline) == 0) {
+      str_renderer_sht(cons->sht, cons->cur_x, cons->cur_y, COL8_FFFFFF, COL8_000000, "Bad command", 11);
+      cons_newline(cons);
+      cons_newline(cons);
+    }
   }
 }
 
@@ -122,24 +122,39 @@ void cmd_cat(struct CONSOLE *cons, int *fat, char *cmdline)
   cons_newline(cons);
 }
 
-void cmd_hlt(struct CONSOLE *cons, int *fat)
+int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline)
 {
   struct MEMMAN *memman = (struct MEMMAN *) MEMMAN_ADDR;
-  struct FILEINFO *finfo = file_search("HLT.HRB", (struct FILEINFO *) (DISKIMG_ADDR + 0x002600), 224);
   struct SEGMENT_DESCRIPTOR *gdt = (struct SEGMENT_DESCRIPTOR *) GDT_ADDR;
-  char *p;
+  char *p, name[18];
+
+  int i;
+  for (i = 0; i < 13; i++) {
+    if (cmdline[i] <= ' ') break;
+    name[i] = cmdline[i];
+  }
+  name[i] = 0;
+  struct FILEINFO *finfo = file_search(name, (struct FILEINFO *) (DISKIMG_ADDR + 0x002600), 224);
+
+  if (finfo == 0 && name[i - 1] != '.') {
+    name[i    ] = '.';
+    name[i + 1] = 'H';
+    name[i + 2] = 'R';
+    name[i + 3] = 'B';
+    name[i + 4] = 0;
+    finfo = file_search(name, (struct FILEINFO *) (DISKIMG_ADDR + 0x002600), 224);
+  }
 
   if (finfo != 0) {
     p = (char *) memman_alloc_4k(memman, finfo->size);
     file_loadfile(finfo->clustno, finfo->size, p, fat, (char *) (DISKIMG_ADDR + 0x003e00));
     set_sgmntdsc(gdt + 1003, finfo->size - 1, (int) p, AR_CODE32_ER);
     farcall(0, 1003 * 8);
-    memman_free_4k(memman, (int) p, finfo->size);
-  } else { // file not found
-    str_renderer_sht(cons->sht, 8, cons->cur_y, COL8_FFFFFF, COL8_000000, "File not found.", 15);
     cons_newline(cons);
+    memman_free_4k(memman, (int) p, finfo->size);
+    return 1;
   }
-  cons_newline(cons);
+  return 0;
 }
 
 void console_task(struct SHEET *sht, unsigned int memtotal)
