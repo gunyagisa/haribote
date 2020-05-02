@@ -29,7 +29,7 @@ $(BUILD)geocide.sys: $(BUILD)asmhead.bin $(BUILD)bootpack.bin Makefile
 
 $(BUILD)hlt.hrb: $(SRC)hlt.asm
 	nasm -f elf32 -o $(BUILD)hlt.o $<
-	ld -m elf_i386 -T har.ld -o $@ $(BUILD)hlt.o
+	ld -m elf_i386 -T binary.ld -o $@ $(BUILD)hlt.o
 
 $(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys $(BUILD)hlt.hrb Makefile
 	mformat -f 1440 -C -B $< -i $@ ::
