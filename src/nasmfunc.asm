@@ -112,9 +112,6 @@ farjmp: ; farjmp (int eip, int cs);
 
 farcall: 
         call            far [esp + 4]
-fin:    
-        hlt
-        jmp             fin
         ret
 
 inthandler21_asm:
