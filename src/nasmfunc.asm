@@ -169,4 +169,4 @@ cons_putchar_asm: ; called by far call
         push            dword [0xfec]
         call            cons_putchar
         add             esp, 12
-        retf
+        iret

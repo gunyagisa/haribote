@@ -25,6 +25,7 @@ void init_gdtidt(void)
         set_gatedsc(idt + 0x20, (int) inthandler20_asm, 2 * 8, AR_INTGATE32);
 	set_gatedsc(idt + 0x21, (int) inthandler21_asm, 2 * 8, AR_INTGATE32);
 	set_gatedsc(idt + 0x2c, (int) inthandler2c_asm, 2 * 8, AR_INTGATE32);
+        set_gatedsc(idt + 0x40, (int) cons_putchar_asm, 2 * 8, AR_INTGATE32);
         load_idtr(LIMIT_IDT, IDT_ADDR);
 
 }
