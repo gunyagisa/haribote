@@ -199,7 +199,7 @@ void console_task(struct SHEET *sht, unsigned int memtotal)
       }
       if (256 <= i && i <= 511) {
         if (i == 8 + 256) { // backspace
-          if (cons.cur_c > 16) {
+          if (cons.cur_x > 16) {
             cons_putchar(&cons, ' ', 0);
             cons.cur_x -= 8;
           }
