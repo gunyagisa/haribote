@@ -23,9 +23,7 @@ void cons_putchar(struct CONSOLE *cons, int chr, char move)
   } else if (s[0] == 0x0d) { // CR
     // nothing
   } else { // normal chara
-    str_renderer_sht(cons->sht, cons->cur_x, cons->cur_y, COL8_FFFFFF, COL8_000000, s, 1);
-    if (move != 0) {
-      cons->cur_x += 8;
+    str_renderer_sht(cons->sht, cons->cur_x, cons->cur_y, COL8_FFFFFF, COL8_000000, s, 1); if (move != 0) { cons->cur_x += 8;
       if (cons->cur_x == 8 + 240) {
         cons_newline(cons);
       }
@@ -254,6 +252,7 @@ void cons_putstr0(struct CONSOLE *cons, char *s)
 {
   while (*s != 0) {
     cons_putchar(cons, *s, 1);
+    s++;
   }
 }
 
@@ -261,5 +260,17 @@ void cons_putstr1(struct CONSOLE *cons, char *s, int n)
 {
   for (int i = 0; i < n; i++) {
     cons_putchar(cons, s[i], 1);
+  }
+}
+
+void hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int eax)
+{
+  struct CONSOLE *cons = (struct CONSOLE *) (int *) 0xfec;
+  if (edx == 1) {
+    cons_putchar(cons, eax & 0xff, 1);
+  } else if (edx == 2) {
+    cons_putstr0(cons, (char *) ebx);
+  } else if (edx == 3) {
+    cons_putstr1(cons, (char *) ebx, ecx);
   }
 }

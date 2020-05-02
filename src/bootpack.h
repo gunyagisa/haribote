@@ -29,6 +29,7 @@ void inthandler21_asm(void);
 void inthandler2c_asm(void);
 void inthandler20_asm(void);
 void cons_putchar_asm(void);
+void hrb_api_asm(void);
 
 //struct to store the boot information written in asmhead.asm
 typedef struct BOOTINFO {

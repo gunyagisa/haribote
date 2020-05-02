@@ -9,9 +9,11 @@ global	load_gdtr, load_idtr
 global  inthandler21_asm, inthandler2c_asm, inthandler20_asm
 global  load_tr, farjmp, farcall
 global  cons_putchar_asm
+global  hrb_api_asm
 
 EXTERN  inthandler21, inthandler2c, inthandler20
 EXTERN  cons_putchar
+extern  hrb_api
 
 ;write function below
 
@@ -171,5 +173,14 @@ cons_putchar_asm: ; called by far call
         push            dword [0xfec]
         call            cons_putchar
         add             esp, 12
+        popad
+        iret
+
+hrb_api_asm:
+        sti
+        pushad
+        pushad
+        call            hrb_api
+        add             esp, 32
         popad
         iret
