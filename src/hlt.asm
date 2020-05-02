@@ -3,6 +3,7 @@ bits 32
 
 section .text
 
+  sti
   mov   al, 'H'
   int   0x40
   mov   al, 'e'
