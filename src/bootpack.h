@@ -24,7 +24,7 @@ void io_store_eflags(int eflags), store_cr0(int cr0);
 void load_gdtr(int limit, int addr);
 void load_idtr(int limit, int addr);
 void load_tr(int tr);
-void farjmp(int, int);
+void farjmp(int, int), farcall(int,int);
 void inthandler21_asm(void);
 void inthandler2c_asm(void);
 void inthandler20_asm(void);

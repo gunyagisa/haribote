@@ -7,9 +7,11 @@ global 	io_out8 ,io_out16, io_out32, io_in8, io_in16, io_in32
 global	io_store_eflags ,io_load_eflags, store_cr0, load_cr0
 global	load_gdtr, load_idtr
 global  inthandler21_asm, inthandler2c_asm, inthandler20_asm
-global  load_tr, farjmp
+global  load_tr, farjmp, farcall
+global  cons_putchar_asm
 
 EXTERN  inthandler21, inthandler2c, inthandler20
+EXTERN  cons_putchar
 
 ;write function below
 
@@ -108,6 +110,13 @@ farjmp: ; farjmp (int eip, int cs);
         jmp             far [esp + 4]
         ret
 
+farcall: 
+        call            far [esp + 4]
+fin:    
+        hlt
+        jmp             fin
+        ret
+
 inthandler21_asm:
         push            es
         push            ds
@@ -155,3 +164,12 @@ inthandler20_asm:
         pop             ds
         pop             es
         iretd
+
+cons_putchar_asm: ; called by far call
+        push            1
+        and             eax, 0xff
+        push            eax
+        push            dword [0xfec]
+        call            cons_putchar
+        add             esp, 12
+        retf

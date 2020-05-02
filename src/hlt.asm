@@ -5,7 +5,7 @@ section .text
 global HariMain
 
 HariMain:
-  cli
-fin:
-  hlt
-  jmp   fin
+  mov   al, 'A'
+  call  2*8:0x2da4 ; far call cons_putchar_asm
+  retf
+
