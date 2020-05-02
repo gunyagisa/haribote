@@ -163,10 +163,13 @@ inthandler20_asm:
         iretd
 
 cons_putchar_asm: ; called by far call
+        sti
+        pushad
         push            1
         and             eax, 0xff
         push            eax
         push            dword [0xfec]
         call            cons_putchar
         add             esp, 12
+        popad
         iret
