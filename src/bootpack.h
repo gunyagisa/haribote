@@ -25,11 +25,13 @@ void load_gdtr(int limit, int addr);
 void load_idtr(int limit, int addr);
 void load_tr(int tr);
 void farjmp(int, int), farcall(int,int);
+int inthandler0d_asm(int *esp);
 void inthandler21_asm(void);
 void inthandler2c_asm(void);
 void inthandler20_asm(void);
 void cons_putchar_asm(void);
 void hrb_api_asm(void);
+void start_app(int eip, int cs, int esp, int ds);
 
 //struct to store the boot information written in asmhead.asm
 typedef struct BOOTINFO {

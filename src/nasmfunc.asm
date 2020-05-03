@@ -6,13 +6,11 @@ global	io_hlt , io_cli, io_sti, io_stihlt
 global 	io_out8 ,io_out16, io_out32, io_in8, io_in16, io_in32
 global	io_store_eflags ,io_load_eflags, store_cr0, load_cr0
 global	load_gdtr, load_idtr
-global  inthandler21_asm, inthandler2c_asm, inthandler20_asm
+global  inthandler21_asm, inthandler2c_asm, inthandler20_asm, inthandler0d_asm
 global  load_tr, farjmp, farcall
-global  cons_putchar_asm
-global  hrb_api_asm
+global  hrb_api_asm, start_app
 
-EXTERN  inthandler21, inthandler2c, inthandler20
-EXTERN  cons_putchar
+EXTERN  inthandler21, inthandler2c, inthandler20, inthandler0d
 extern  hrb_api
 
 ;write function below
@@ -164,23 +162,137 @@ inthandler20_asm:
         pop             es
         iretd
 
-cons_putchar_asm: ; called by far call
-        sti
+inthandler0d_asm:
+        sti 
+        push            es
+        push            ds
         pushad
-        push            1
-        and             eax, 0xff
+        mov             ax, ss
+        cmp             ax, 1*8
+        jne             .from_app
+
+        mov             eax, esp
+        push            ss
         push            eax
-        push            dword [0xfec]
-        call            cons_putchar
-        add             esp, 12
+        mov             ax, ss
+        mov             ds, ax
+        mov             es, ax
+        call            inthandler0d
+        add             esp, 8
         popad
-        iret
+        pop             ds
+        pop             es
+        add             esp, 4
+        iretd
+
+.from_app
+        cli
+        mov             eax, 1 * 8
+        mov             ds, ax
+        mov             ecx, [0xfe4]
+        add             ecx, -8
+        mov             [ecx + 4], ss
+        mov             [ecx], esp
+        mov             ss, ax
+        mov             es, ax
+        mov             esp, ecx
+        sti
+        call            inthandler0d
+        cli
+        cmp             eax, 0
+        jne             .kill
+        pop             ecx
+        pop             eax
+        mov             ss, ax
+        mov             esp, ecx
+        popad
+        pop             ds
+        pop             es
+        add             esp, 4
+        iretd
+.kill
+        mov             eax, 1 * 8
+        mov             es, ax
+        mov             ss, ax
+        mov             ds, ax
+        mov             fs, ax
+        mov             gs, ax
+        mov             esp, [0xfe4]
+        sti
+        popad
+        ret
 
 hrb_api_asm:
+        push            ds
+        push            es
+        pushad
+        mov             eax, 1 * 8
+        mov             ds, ax
+        mov             ecx, [0xfe4]
+        add             ecx, -40
+        mov             [ecx + 32], esp
+        mov             [ecx + 36], ss
+        mov             edx, [esp]
+        mov             ebx, [esp + 4]
+        mov             [ecx], edx
+        mov             [ecx + 4], ebx
+        mov             edx, [esp + 8]
+        mov             ebx, [esp + 12]
+        mov             [ecx + 8], edx
+        mov             [ecx + 12], ebx
+        mov             edx, [esp + 16]
+        mov             ebx, [esp + 20]
+        mov             [ecx + 16], edx
+        mov             [ecx + 20], ebx
+        mov             edx, [esp + 24]
+        mov             ebx, [esp + 28]
+        mov             [ecx + 24], edx
+        mov             [ecx + 28], ebx
+
+        mov             es, ax
+        mov             ss, ax
+        mov             es, ecx
+
         sti
-        pushad
-        pushad
         call            hrb_api
-        add             esp, 32
+        mov             ecx, [esp + 32]
+        mov             eax, [esp + 36]
+        cli
+        mov             ss, ax
+        mov             esp, ecx
         popad
-        iret
+        pop             es
+        pop             ds
+        iretd
+
+start_app:
+        pushad
+        mov             eax, [esp + 36]
+        mov             ecx, [esp + 40]
+        mov             edx, [esp + 44]
+        mov             ebx, [esp + 48]
+        mov             [0xfe4], esp
+        cli
+        mov             es, bx
+        mov             ss, bx
+        mov             ds, bx
+        mov             fs, bx
+        mov             gs, bx
+        mov             esp, edx
+        sti
+        push            ecx
+        push            eax
+        call far        [esp]
+
+        mov             eax, 1*8
+        cli 
+        mov             es, ax
+        mov             ss, ax
+        mov             ds, ax
+        mov             fs, ax
+        mov             gs, ax
+        mov             esp, [0xfe4]
+        sti
+        popad
+        ret
+
