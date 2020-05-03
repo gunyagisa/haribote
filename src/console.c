@@ -136,6 +136,7 @@ int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline)
 
   if (finfo != 0) {
     p = (char *) memman_alloc_4k(memman, finfo->size);
+    *((int *) 0xfe8) = (int) p;
     file_loadfile(finfo->clustno, finfo->size, p, fat, (char *) (DISKIMG_ADDR + 0x003e00));
     set_sgmntdsc(gdt + 1003, finfo->size - 1, (int) p, AR_CODE32_ER);
     farcall(0, 1003 * 8);
@@ -266,12 +267,13 @@ void cons_putstr1(struct CONSOLE *cons, char *s, int n)
 void hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int eax)
 {
   struct CONSOLE *cons = (struct CONSOLE *) *((int *) 0xfec);
+  int cs_base = *((int *) 0xfe8);
   
   if (edx == 1) {
     cons_putchar(cons, eax & 0xff, 1);
   } else if (edx == 2) {
-    cons_putstr0(cons, (char *) ebx);
+    cons_putstr0(cons, (char *) ebx + cs_base);
   } else if (edx == 3) {
-    cons_putstr1(cons, (char *) ebx, ecx);
+    cons_putstr1(cons, (char *) ebx + cs_base, ecx);
   }
 }
