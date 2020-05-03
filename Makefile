@@ -9,11 +9,11 @@ CFLAGS=-Wall -c -march=i486 -m32 -fno-pic -nostdlib -fno-stack-protector
 $(BUILD)%.bin: $(SRC)%.asm Makefile
 	nasm -o $@ $<
 
-$(BUILD)%.o: $(SRC)%.c $(SRC)%.h Makefile
-	$(CC) $(CFLAGS) -o $@ $<
-
 $(BUILD)%.o: $(SRC)%.c Makefile
 	$(CC) $(CFLAGS) -o $@ $<
+
+$(BUILD)%.o: $(SRC)%.s Makefile
+	nasm -f elf32 -o $@ $<
 
 $(BUILD)hankaku.o: $(SRC)hankaku.c Makefile
 	$(CC) -c -m32 -o $@ $<
@@ -33,13 +33,18 @@ $(BUILD)hello.hrb: $(SRC)hello.asm
 $(BUILD)hello2.hrb: $(SRC)hello2.asm
 	nasm $< -o $@
 
-$(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys $(BUILD)hello.hrb $(BUILD)hello2.hrb Makefile
+$(BUILD)%.hrb: $(BUILD)%.o $(BUILD)a_nasm.o
+	ld $< $(BUILD)a_nasm.o -o $@ -e HariMain -m elf_i386 -T binary.ld
+
+$(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys $(BUILD)hello.hrb $(BUILD)hello2.hrb $(BUILD)hello3.hrb $(BUILD)a.hrb Makefile
 	mformat -f 1440 -C -B $< -i $@ ::
 	mcopy $(BUILD)geocide.sys -i $@ ::
 	mcopy $(SRC)ipl.asm -i $@ ::
 	mcopy ./Makefile -i $@ ::
 	mcopy ./build-cache/hello.hrb -i $@ ::
 	mcopy ./build-cache/hello2.hrb -i $@ ::
+	mcopy ./build-cache/hello3.hrb -i $@ ::
+	mcopy ./build-cache/a.hrb -i $@ ::
 
 
 
