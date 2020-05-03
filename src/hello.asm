@@ -1,9 +1,8 @@
 ; hlt.asm
 bits 32
 
-section .text
-
   mov   ecx, msg
+  mov   edx, 1
 
 loop:
   mov   al, [cs:ecx]

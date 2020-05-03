@@ -30,12 +30,16 @@ $(BUILD)geocide.sys: $(BUILD)asmhead.bin $(BUILD)bootpack.bin Makefile
 $(BUILD)hello.hrb: $(SRC)hello.asm
 	nasm $< -o $@
 
-$(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys $(BUILD)hello.hrb Makefile
+$(BUILD)hello2.hrb: $(SRC)hello2.asm
+	nasm $< -o $@
+
+$(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys $(BUILD)hello.hrb $(BUILD)hello2.hrb Makefile
 	mformat -f 1440 -C -B $< -i $@ ::
 	mcopy $(BUILD)geocide.sys -i $@ ::
 	mcopy $(SRC)ipl.asm -i $@ ::
 	mcopy ./Makefile -i $@ ::
 	mcopy ./build-cache/hello.hrb -i $@ ::
+	mcopy ./build-cache/hello2.hrb -i $@ ::
 
 
 
