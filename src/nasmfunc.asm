@@ -6,11 +6,11 @@ global	io_hlt , io_cli, io_sti, io_stihlt
 global 	io_out8 ,io_out16, io_out32, io_in8, io_in16, io_in32
 global	io_store_eflags ,io_load_eflags, store_cr0, load_cr0
 global	load_gdtr, load_idtr
-global  inthandler21_asm, inthandler2c_asm, inthandler20_asm, inthandler0d_asm
+global  inthandler21_asm, inthandler2c_asm, inthandler20_asm, inthandler0d_asm, inthandler0c_asm
 global  load_tr, farjmp, farcall
 global  hrb_api_asm, start_app
 
-EXTERN  inthandler21, inthandler2c, inthandler20, inthandler0d
+EXTERN  inthandler21, inthandler2c, inthandler20, inthandler0d, inthandler0c
 extern  hrb_api
 
 ;write function below
@@ -173,6 +173,26 @@ inthandler0d_asm:
         mov             ds, ax
         mov             es, ax
         call            inthandler0d
+        cmp             eax, 0
+        jne             end_app
+        pop             eax
+        popad
+        pop             ds
+        pop             es
+        add             esp, 4
+        iretd
+
+inthandler0c_asm:
+        sti
+        push            es
+        push            ds
+        pushad
+        mov             eax, esp
+        push            eax
+        mov             ax, ss
+        mov             ds, ax
+        mov             es, ax
+        call            inthandler0c
         cmp             eax, 0
         jne             end_app
         pop             eax

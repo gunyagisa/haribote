@@ -33,19 +33,18 @@ $(BUILD)%.hrb: $(SRC)%.asm
 $(BUILD)%.hrb: $(BUILD)%.o $(BUILD)a_nasm.o
 	ld $< $(BUILD)a_nasm.o -o $@ -e HariMain -m elf_i386 -T binary.ld
 
-$(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys $(BUILD)hello.hrb $(BUILD)hello3.hrb Makefile
+$(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys $(BUILD)hello.hrb $(BUILD)hello3.hrb $(BUILD)bug.hrb Makefile
 	mformat -f 1440 -C -B $< -i $@ ::
 	mcopy $(BUILD)geocide.sys -i $@ ::
 	mcopy $(SRC)ipl.asm -i $@ ::
 	mcopy ./Makefile -i $@ ::
-	mcopy ./build-cache/hello.hrb -i $@ ::
-	mcopy ./build-cache/hello3.hrb -i $@ ::
+	mcopy ./build-cache/*.hrb -i $@ ::
 
 run: $(BUILD)geocide.img
 	$(QEMU) -m 32 -d guest_errors -fda $< -show-cursor -monitor stdio
 
 clean:
-	rm -f $(BUILD)*.bin $(BUILD)*.o $(BUILD)geocide.*
+	rm -f $(BUILD)*
 	rm -f mapfile
 
 .PHONY: clean
