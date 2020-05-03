@@ -13,7 +13,8 @@ loop:
   jmp   loop
 
 fin:
-  retf
+  mov   edx, 4
+  int   0x40
 
 msg:
   db    "Hello world", 0

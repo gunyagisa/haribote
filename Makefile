@@ -27,22 +27,20 @@ $(BUILD)bootpack.bin: $(addprefix $(BUILD), $(OBJ)) Makefile
 $(BUILD)geocide.sys: $(BUILD)asmhead.bin $(BUILD)bootpack.bin Makefile 
 	cat $< $(BUILD)bootpack.bin > $@
 
-$(BUILD)hello.hrb: $(SRC)hello.asm
-	nasm $< -o $@
-
-$(BUILD)hello2.hrb: $(SRC)hello2.asm
+$(BUILD)%.hrb: $(SRC)%.asm
 	nasm $< -o $@
 
 $(BUILD)%.hrb: $(BUILD)%.o $(BUILD)a_nasm.o
 	ld $< $(BUILD)a_nasm.o -o $@ -e HariMain -m elf_i386 -T binary.ld
 
-$(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys $(BUILD)hello3.hrb $(BUILD)crack1.hrb Makefile
+$(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys $(BUILD)hello.hrb $(BUILD)hello3.hrb $(BUILD)crack2.hrb Makefile
 	mformat -f 1440 -C -B $< -i $@ ::
 	mcopy $(BUILD)geocide.sys -i $@ ::
 	mcopy $(SRC)ipl.asm -i $@ ::
 	mcopy ./Makefile -i $@ ::
+	mcopy ./build-cache/hello.hrb -i $@ ::
 	mcopy ./build-cache/hello3.hrb -i $@ ::
-	mcopy ./build-cache/crack1.hrb -i $@ ::
+	mcopy ./build-cache/crack2.hrb -i $@ ::
 
 
 
