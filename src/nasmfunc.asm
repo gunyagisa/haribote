@@ -8,7 +8,7 @@ global	io_store_eflags ,io_load_eflags, store_cr0, load_cr0
 global	load_gdtr, load_idtr
 global  inthandler21_asm, inthandler2c_asm, inthandler20_asm, inthandler0d_asm, inthandler0c_asm
 global  load_tr, farjmp, farcall
-global  hrb_api_asm, start_app
+global  hrb_api_asm, start_app, end_app_asm
 
 EXTERN  inthandler21, inthandler2c, inthandler20, inthandler0d, inthandler0c
 extern  hrb_api
@@ -174,7 +174,7 @@ inthandler0d_asm:
         mov             es, ax
         call            inthandler0d
         cmp             eax, 0
-        jne             end_app
+        jne             end_app_asm
         pop             eax
         popad
         pop             ds
@@ -194,7 +194,7 @@ inthandler0c_asm:
         mov             es, ax
         call            inthandler0c
         cmp             eax, 0
-        jne             end_app
+        jne             end_app_asm
         pop             eax
         popad
         pop             ds
@@ -213,15 +213,16 @@ hrb_api_asm:
         mov             es, ax
         call            hrb_api
         cmp             eax, 0
-        jne             end_app
+        jne             end_app_asm
         add             esp, 32
         popad
         pop             es
         pop             ds
         iretd
 
-end_app:
+end_app_asm:
         mov             esp, [eax]
+        mov             dword [eax + 4], 0
         popad
         ret
 

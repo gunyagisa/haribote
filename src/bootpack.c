@@ -23,6 +23,7 @@ void HariMain(void)
 
   struct TASK *task_a, *task_cons;
   struct TIMER *timer;
+  struct CONSOLE *cons;
 
   static char keytable0[0x80] = {
     0,   0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '^',   0,   0,
@@ -210,6 +211,14 @@ void HariMain(void)
           key_leds ^= 4;
           fifo32_put(&keycmd, KEYCMD_LED);
           fifo32_put(&keycmd, key_leds);
+        }
+        if (d == 256 + 0x3b && key_shift != 0 && task_cons->tss.ss0 != 0) {
+          cons = (struct CONSOLE *) *((int *) 0xfec);
+          cons_putstr0(cons, "\nBreak(KEY) :\n");
+          io_cli();
+          task_cons->tss.eax = (int) &(task_cons->tss.esp0);
+          task_cons->tss.eip = (int) end_app_asm;
+          io_sti();
         }
         if (d == 256 + 0x45) { //numlock
           key_leds ^= 2;
