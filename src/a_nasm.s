@@ -2,7 +2,7 @@
 
 bits 32
 
-global api_putchar, api_end
+global api_putchar, api_end, api_putstr0
 
 section .text
 
