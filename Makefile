@@ -28,7 +28,8 @@ $(BUILD)geocide.sys: $(BUILD)asmhead.bin $(BUILD)bootpack.bin Makefile
 	cat $< $(BUILD)bootpack.bin > $@
 
 $(BUILD)%.hrb: $(SRC)%.asm
-	nasm $< -o $@
+	nasm -f elf32 -o $(BUILD)tmp.o $<
+	ld $(BUILD)tmp.o -o $@ -e HariMain -m elf_i386 -T binary.ld
 
 $(BUILD)%.hrb: $(BUILD)%.o $(BUILD)a_nasm.o
 	ld $< $(BUILD)a_nasm.o -o $@ -e HariMain -m elf_i386 -T binary.ld

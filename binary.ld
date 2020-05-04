@@ -18,7 +18,7 @@ SECTIONS
 
   .data 0x0400 : AT ( ADDR(.text) + SIZEOF(.text) ) {
     *(.data)
-    *(.rodata)
+    *(.rodata*)
     *(.bss)
   }
 
