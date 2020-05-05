@@ -137,6 +137,8 @@ void HariMain(void)
   sprintf(s, "Memory Size: %dMB  free: %dKB", memtotal / (1024 * 1024), memman_total(memman) / 1024);
   str_renderer_sht(sht_back, 0, 32, COL8_FFFFFF, COL8_008484, s, 40);
 
+  int mmx = -1, mmy = -1;
+
   for (;;) {
     if (fifo32_status(&keycmd) > 0 && keycmd_wait < 0) {
       keycmd_wait = fifo32_get(&keycmd);
@@ -291,17 +293,34 @@ void HariMain(void)
           if ((mdec.btn & 0x01) != 0) {
             struct SHEET *sht;
             int x, y;
-            for (int j = shtctl->top - 1; j > 0; j--) {
-              sht = shtctl->sheets[j];
-              x = mx - sht->vx0;
-              y = my - sht->vy0;
-              if (0 <= x && x <= sht->bxsize && 0 <= y && y <= sht->bysize) {
-                if (sht->buf[y * sht->bxsize + x] != sht->col_inv) {
-                  sheet_updown(sht, shtctl->top - 1);
-                  break;
+            if(mmx < 0) {
+              // normal mode
+              for (int j = shtctl->top - 1; j > 0; j--) {
+                sht = shtctl->sheets[j];
+                x = mx - sht->vx0;
+                y = my - sht->vy0;
+                if (0 <= x && x <= sht->bxsize && 0 <= y && y <= sht->bysize) {
+                  if (sht->buf[y * sht->bxsize + x] != sht->col_inv) {
+                    sheet_updown(sht, shtctl->top - 1);
+                    if (3 <= x && x < sht->bxsize - 3 && 3 <= y && y < 21) {
+                      // prepare for window move
+                      mmx = mx;
+                      mmy = my;
+                    }
+                    break;
+                  }
                 }
               }
+            } else {
+              // window move
+              x = mx - mmx;
+              y = my - mmy;
+              sheet_slide(sht, sht->vx0 + x, sht->vy0 + y);
+              mmx = mx;
+              mmy = my;
             }
+          } else {
+            mmx = -1;
           }
         }
       } else if (d <= 1){
