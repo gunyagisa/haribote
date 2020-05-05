@@ -304,13 +304,17 @@ int * hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int
     sheet_updown(sht, 3);
     reg[7] = (int) sht;
   } else if (edx == 6) { // api_putstrwin
-    struct SHEET *sht = (struct SHEET *) ebx;
+    struct SHEET *sht = (struct SHEET *) (ebx & 0xfffffffe);
     str_renderer8(sht->buf, sht->bxsize, eax, esi, edi, (char *) ebp + ds_base);
-    sheet_refresh(sht, esi, edi, esi + ecx * 8, edi + 16);
+    if ((ebx & 1) == 0) {
+      sheet_refresh(sht, esi, edi, esi + ecx * 8, edi + 16);
+    }
   } else if (edx == 7) { // api_boxfilliwin
-    struct SHEET *sht = (struct SHEET *) ebx;
+    struct SHEET *sht = (struct SHEET *) (ebx & 0xfffffffe);
     boxfill8(sht->buf, sht->bxsize, ebp, eax, ecx, esi, edi);
-    sheet_refresh(sht, eax, ecx, esi + 1, edi + 1);
+    if ((ebx & 1) == 0) {
+      sheet_refresh(sht, eax, ecx, esi + 1, edi + 1);
+    }
   } else if (edx == 8) { // api_initmalloc
     memman_init((struct MEMMAN *) (ebx + ds_base));
     ecx &= 0xfffffffe;
@@ -321,6 +325,15 @@ int * hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int
   } else if (edx == 10) { // api_free
     ecx = (ecx + 0x0f) & 0xfffffff0;
     memman_free_4k((struct MEMMAN *) (ebx + ds_base), eax, ecx);
+  } else if (edx == 11) { // api_point
+    struct SHEET *sht = (struct SHEET *) (ebx & 0xfffffffe);
+    sht->buf[esi + edi * sht->bxsize] = eax;
+    if ((ebx & 1) == 0) {
+      sheet_refresh(sht, esi, edi, esi + 1, edi + 1);
+    }
+  } else if (edx == 12) { // api_refreshwin
+    struct SHEET *sht = (struct SHEET *) ebx;
+    sheet_refresh(sht, eax, ecx, esi, edi);
   }
   return 0;
 }
