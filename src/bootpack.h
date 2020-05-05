@@ -118,6 +118,7 @@ void str_renderer_sht(struct SHEET *, int, int , int, int, char *, int);
 struct CONSOLE {
   struct SHEET *sht;
   int cur_x, cur_y, cur_c;
+  struct TIMER *timer;
 };
 void console_task(struct SHEET *, unsigned int); 
 void cons_newline(struct CONSOLE *); 

@@ -4,7 +4,7 @@ bits 32
 
 global api_putchar, api_end, api_putstr0, api_openwin, api_openwin, api_boxfillwin, api_putstrwin
 global api_initmalloc, api_malloc, api_free
-global api_point, api_refreshwin, api_linewin, api_closewin
+global api_point, api_refreshwin, api_linewin, api_closewin, api_getkey
 
 section .text
 
@@ -132,6 +132,11 @@ api_linewin:
   pop   edi
   ret
 
+api_getkey: ; int api_getkey(int mode)
+  mov   edx, 15
+  mov   eax, [esp + 4]
+  int   0x40
+  ret
 
 api_end:
   mov   edx, 4

@@ -1,10 +1,14 @@
 #pragma once
+
+#include "bootpack.h"
 #include "memory.h"
+
 
 struct SHEET {
     unsigned char *buf;
     int bxsize, bysize, vx0, vy0, col_inv, height, flags;
     struct SHTCTL *ctl;
+    struct TASK *task;
 };
 
 #define SHEET_MAX       256

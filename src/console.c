@@ -1,5 +1,6 @@
 #include "bootpack.h"
 #include "dsctbl.h"
+#include "sheet.h"
 
 
 void cons_putchar(struct CONSOLE *cons, int chr, char move)
@@ -152,6 +153,14 @@ int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline)
         q[esp + i] = p[dathrb + i];
       }
       start_app(0x1b, 1003 * 8, esp, 1004 * 8, &(task->tss.esp0));
+      struct SHTCTL *shtctl = (struct SHTCTL *) *((int *) 0xfe4);
+      struct SHEET *sht;
+      for (int i = 0; i < SHEET_MAX; i++) {
+        sht = &(shtctl->sheets0[i]);
+        if(sht->flags != 0 && sht->task == task) {
+          sheet_free(sht);
+        }
+      }
       memman_free_4k(memman, (int) q, segsiz);
     } else {
       cons_putstr0(cons, ".hrb file format error.\n");
@@ -165,7 +174,6 @@ int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline)
 
 void console_task(struct SHEET *sht, unsigned int memtotal)
 {
-  struct TIMER *timer;
   struct TASK *task = task_now();
   int i, fifobuf[128];
   char cmdline[30];
@@ -177,14 +185,14 @@ void console_task(struct SHEET *sht, unsigned int memtotal)
   cons.cur_x = 8;
   cons.cur_y = 28;
   cons.cur_c  = -1;
+  cons.timer = timer_alloc();
+  timer_init(cons.timer, &task->fifo, 1);
+  settimer(cons.timer, 50);
+
 
   *((int *) 0xfec) = (int) &cons;
 
-  
   fifo32_init(&task->fifo, 128, fifobuf, task);
-  timer = timer_alloc();
-  timer_init(timer, &task->fifo, 1);
-  settimer(timer, 50);
   file_readfat(fat, (unsigned char *) (DISKIMG_ADDR + 0x000200));
 
   cons_putchar(&cons, '>', 1);
@@ -199,17 +207,17 @@ void console_task(struct SHEET *sht, unsigned int memtotal)
       io_sti();
       if ( i <= 1) {
         if (i != 0) {
-          timer_init(timer, &task->fifo, 0);
+          timer_init(cons.timer, &task->fifo, 0);
           if (cons.cur_c >= 0) {
             cons.cur_c = COL8_FFFFFF;
           }
         } else {
-          timer_init(timer, &task->fifo, 1);
+          timer_init(cons.timer, &task->fifo, 1);
           if (cons.cur_c >= 0) {
             cons.cur_c = COL8_000000;
           }
         }
-        settimer(timer, 50);
+        settimer(cons.timer, 50);
       }
       if (i == 2) { // cursor on
         cons.cur_c = COL8_FFFFFF;
@@ -338,8 +346,9 @@ int * hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int
     cons_putstr1(cons, (char *) ebx + ds_base, ecx);
   } else if (edx == 4) {
     return &(task->tss.esp0);
-  } else if (edx == 5) {
+  } else if (edx == 5) { // api_openwin
     struct SHEET *sht = sheet_alloc(shtctl);
+    sht->task = task;
     sheet_setbuf(sht, (char *) ebx + ds_base, esi, edi, eax);
     make_window8((char *) ebx + ds_base, esi, edi, (char *) ecx + ds_base, 0);
     sheet_slide(sht, 100, 50);
@@ -384,6 +393,32 @@ int * hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int
     }
   } else if (edx == 14) { //  api_closewin
     sheet_free((struct SHEET *) ebx);
+  } else if (edx == 15) {
+    for (;;) {
+      io_cli();
+      if (fifo32_status(&task->fifo) == 0) {
+        if (eax != 0) {
+          task_sleep(task);
+        } else {
+          io_sti();
+          reg[7] = -1;
+          return 0;
+        }
+      }
+      int i = fifo32_get(&task->fifo);
+      io_sti();
+      if (i <= 1) {
+        timer_init(cons->timer, &task->fifo, 1);
+        settimer(cons->timer, 50);
+      }
+      if (i == 2) {
+        cons->cur_c = COL8_FFFFFF;
+      }
+      if (256 <= i && i <= 511) {
+        reg[7] = i - 256;
+        return 0;
+      }
+    }
   }
   return 0;
 }
