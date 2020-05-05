@@ -4,6 +4,7 @@ bits 32
 
 global api_putchar, api_end, api_putstr0, api_openwin, api_openwin, api_boxfillwin, api_putstrwin
 global api_initmalloc, api_malloc, api_free
+global api_point, api_refreshwin
 
 section .text
 
@@ -69,6 +70,37 @@ api_boxfillwin:
   int   0x40
   pop   ebx
   pop   ebp
+  pop   esi
+  pop   edi
+  ret
+
+api_point:
+  push  edi
+  push  esi
+  push  ebx
+  mov   edx, 11
+  mov   ebx, [esp + 16]
+  mov   esi, [esp + 20]
+  mov   edi, [esp + 24]
+  mov   eax, [esp + 28]
+  int   0x40
+  pop   ebx
+  pop   esi
+  pop   edi
+  ret
+
+api_refreshwin:
+  push  edi
+  push  esi
+  push  ebx
+  mov   edx, 12
+  mov   ebx, [esp + 16]
+  mov   eax, [esp + 20]
+  mov   ecx, [esp + 24]
+  mov   esi, [esp + 28]
+  mov   edi, [esp + 32]
+  int   0x40
+  pop   ebx
   pop   esi
   pop   edi
   ret
