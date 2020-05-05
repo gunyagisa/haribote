@@ -4,7 +4,7 @@ bits 32
 
 global api_putchar, api_end, api_putstr0, api_openwin, api_openwin, api_boxfillwin, api_putstrwin
 global api_initmalloc, api_malloc, api_free
-global api_point, api_refreshwin, api_linewin
+global api_point, api_refreshwin, api_linewin, api_closewin
 
 section .text
 
@@ -34,6 +34,14 @@ api_openwin: ; int api_openwin(char *buf, int xsize, int ysize, int col_inv, cha
   pop   ebx
   pop   esi
   pop   edi
+  ret
+
+api_closewin: ; void api_closewin(int win)
+  push  ebx
+  mov   edx, 14
+  mov   ebx, [esp + 8]
+  int   0x40
+  pop   ebx
   ret
 
 api_putstrwin: ; void api_putstrwin(int win, int x, int y, int col, int len, char *str)
@@ -123,6 +131,7 @@ api_linewin:
   pop   esi
   pop   edi
   ret
+
 
 api_end:
   mov   edx, 4

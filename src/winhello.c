@@ -1,4 +1,5 @@
 int api_openwin(char *buf, int xsize, int ysize, int col_inv, char*title);
+void api_closewin(int win);
 void api_putstrwin(int win, int x, int y, int col, int len, char *str);
 void api_boxfillwin(int win, int , int , int ,int , int );
 void api_end(void);
@@ -38,5 +39,6 @@ void HariMain()
     api_linewin(win + 1, 88, 26, i * 9 + 88, 89, i);
   }
   api_refreshwin(win, 6, 26, 154, 90);
+  api_closewin(win); 
   api_end();
 }
