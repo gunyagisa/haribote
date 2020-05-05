@@ -73,6 +73,7 @@ void HariMain(void)
   init_palette();	//configure color setting
 
   shtctl = shtctl_init(memman, (unsigned char *)binfo->vram, binfo->scrnx, binfo->scrny);
+  *((int *) 0xfe4) = (int) shtctl;
   task_a = task_init(memman);
   fifo.task = task_a;
   task_run(task_a, 1, 0);
