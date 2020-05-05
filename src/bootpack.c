@@ -74,7 +74,7 @@ void HariMain(void)
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, '_', 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', 0, 0
   };
-  int key_shift = 0, key_to = 0, key_leds = (binfo->leds >> 4) & 7, keycmd_wait = -1;
+  int key_shift = 0, key_leds = (binfo->leds >> 4) & 7, keycmd_wait = -1;
 
   unsigned int memtotal;
 
@@ -217,7 +217,7 @@ void HariMain(void)
           }
         }
         if (d == 256 + 0x0e) {
-          if (key_to == 0) {
+          if (key_win == sht_win) {
             if (cursor_x > 8) {
               str_renderer_sht(sht_win, cursor_x, 28, COL8_000000, COL8_FFFFFF, " ", 1);
               cursor_x -= 8;

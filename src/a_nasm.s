@@ -5,6 +5,7 @@ bits 32
 global api_putchar, api_end, api_putstr0, api_openwin, api_openwin, api_boxfillwin, api_putstrwin
 global api_initmalloc, api_malloc, api_free
 global api_point, api_refreshwin, api_linewin, api_closewin, api_getkey
+global api_alloctimer, api_inittimer, api_settimer, api_freetimer
 
 section .text
 
@@ -170,4 +171,35 @@ api_free: ; void api_free(char *addr, int size);
   mov   eax, [esp + 8]
   mov   ecx, [esp + 12]
   int   0x40
+  ret
+
+api_alloctimer:
+  mov  edx, 16
+  int   0x40
+  ret
+
+api_inittimer:
+  push  ebx
+  mov   edx, 17
+  mov   ebx, [esp + 4]
+  mov   eax, [esp + 8]
+  int   0x40
+  pop   ebx
+  ret
+  
+api_settimer:
+  push  ebx
+  mov   edx, 18
+  mov   ebx, [esp + 4]
+  mov   eax, [esp + 8]
+  int   0x40
+  pop   ebx
+  ret
+
+api_freetimer:
+  push   ebx
+  mov   edx, 19
+  mov   ebx, [esp + 4]
+  mov   eax, [esp + 8]
+  pop   ebx
   ret

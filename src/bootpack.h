@@ -63,6 +63,7 @@ void init_pit(void);
 void settimer(struct TIMER *timer, unsigned int timeout);
 struct TIMER *timer_alloc(void);
 void timer_init(struct TIMER *timer, FIFO32 *fifo, int data);
+void timer_free(struct TIMER *timer);
 
 //mtask
 #define MAX_TASKS       1000

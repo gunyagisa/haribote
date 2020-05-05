@@ -64,7 +64,7 @@ void make_wtitle8(unsigned char *buf, int xsize, char *title, char act)
 void change_wtitle8(struct SHEET *sht, char act)
 {
   int xsize = sht->bxsize;
-  char c, tc_new, tc_old, tbc_old, tbc_new, *buf = sht->buf;
+  char c, tc_new, tc_old, tbc_old, tbc_new, *buf = (char *) sht->buf;
   if (act != 0) {
     tc_new = COL8_FFFFFF;
     tbc_new = COL8_000084;

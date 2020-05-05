@@ -312,6 +312,7 @@ void hrb_api_linewin(struct SHEET *sht, int x0, int y0, int x1, int y1, int col)
     else 
       dy = ((y1 - y0 - 1) << 10) / len;
   } else {
+    len = dy + 1;
     if (y0 > y1)
       dy = -1024;
     else
@@ -350,8 +351,8 @@ int * hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int
     struct SHEET *sht = sheet_alloc(shtctl);
     sht->task = task;
     sht->flags |= 0x10;
-    sheet_setbuf(sht, (char *) ebx + ds_base, esi, edi, eax);
-    make_window8((char *) ebx + ds_base, esi, edi, (char *) ecx + ds_base, 0);
+    sheet_setbuf(sht, (unsigned char *) ebx + ds_base, esi, edi, eax);
+    make_window8((unsigned char *) ebx + ds_base, esi, edi, (char *) ecx + ds_base, 0);
     sheet_slide(sht, 100, 50);
     sheet_updown(sht, 3);
     reg[7] = (int) sht;
@@ -415,11 +416,22 @@ int * hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int
       if (i == 2) {
         cons->cur_c = COL8_FFFFFF;
       }
-      if (256 <= i && i <= 511) {
+      if (i == 3) {
+        cons->cur_c = -1;
+      }
+      if (256 <= i) {
         reg[7] = i - 256;
         return 0;
       }
     }
+  } else if (edx == 16) {
+    reg[7] = (int) timer_alloc();
+  } else if (edx == 17) {
+    timer_init((struct TIMER *) ebx, &task->fifo, eax + 256);
+  } else if (edx == 18) {
+    settimer((struct TIMER *) ebx, eax);
+  } else if (edx == 19) {
+    timer_free((struct TIMER *)ebx);
   }
   return 0;
 }

@@ -1,8 +1,6 @@
 #pragma once
 
-#include "bootpack.h"
 #include "memory.h"
-
 
 struct SHEET {
     unsigned char *buf;
