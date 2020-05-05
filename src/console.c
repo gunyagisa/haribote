@@ -303,14 +303,24 @@ int * hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int
     sheet_slide(sht, 100, 50);
     sheet_updown(sht, 3);
     reg[7] = (int) sht;
-  } else if (edx == 6) {
+  } else if (edx == 6) { // api_putstrwin
     struct SHEET *sht = (struct SHEET *) ebx;
     str_renderer8(sht->buf, sht->bxsize, eax, esi, edi, (char *) ebp + ds_base);
     sheet_refresh(sht, esi, edi, esi + ecx * 8, edi + 16);
-  } else if (edx == 7) {
+  } else if (edx == 7) { // api_boxfilliwin
     struct SHEET *sht = (struct SHEET *) ebx;
     boxfill8(sht->buf, sht->bxsize, ebp, eax, ecx, esi, edi);
     sheet_refresh(sht, eax, ecx, esi + 1, edi + 1);
+  } else if (edx == 8) { // api_initmalloc
+    memman_init((struct MEMMAN *) (ebx + ds_base));
+    ecx &= 0xfffffffe;
+    reg[7] = memman_free((struct MEMMAN *) (ebx + ds_base), eax, ecx);
+  } else if (edx == 9) { // api_malloc
+    ecx = (ecx + 0x0f) & 0xfffffff0;
+    reg[7] = memman_alloc_4k((struct MEMMAN *) (ebx + ds_base), ecx);
+  } else if (edx == 10) { // api_free
+    ecx = (ecx + 0x0f) & 0xfffffff0;
+    memman_free_4k((struct MEMMAN *) (ebx + ds_base), eax, ecx);
   }
   return 0;
 }

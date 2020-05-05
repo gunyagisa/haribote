@@ -3,6 +3,7 @@
 bits 32
 
 global api_putchar, api_end, api_putstr0, api_openwin, api_openwin, api_boxfillwin, api_putstrwin
+global api_initmalloc, api_malloc, api_free
 
 section .text
 
@@ -75,3 +76,33 @@ api_boxfillwin:
 api_end:
   mov   edx, 4
   int   0x40
+
+api_initmalloc: ; void api_initmalloc(void)
+  push  ebx
+  mov   edx, 8
+  mov   ebx, [cs:0x0020]
+  mov   eax, ebx
+  add   eax, 32 * 1024
+  mov   ecx, [cs:0x0000]
+  sub   ecx, eax
+  int   0x40
+  pop   ebx
+  ret
+
+api_malloc: ; char * api_malloc(int size)
+  push  ebx
+  mov   edx, 9
+  mov   ebx, [cs:0x0020]
+  mov   ecx, [esp + 8]
+  int   0x40
+  pop   ebx
+  ret
+
+api_free: ; void api_free(char *addr, int size);
+  push  ebx
+  mov   edx, 10
+  mov   ebx, [cs:0x0020]
+  mov   eax, [esp + 8]
+  mov   ecx, [esp + 12]
+  int   0x40
+  ret
