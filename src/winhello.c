@@ -7,6 +7,7 @@ char *api_malloc(int size);
 void api_free(char *addr, int size);
 void api_point(int win, int x, int y, int col);
 void api_refreshwin(int win, int x0,int y0, int x1, int y1);
+void api_linewin(int win, int x0, int y0, int x1, int y1, int col);
 
 #define a 16807
 #define m 2147483647
@@ -30,15 +31,12 @@ void HariMain()
 {
   int win;
   api_initmalloc();
-  char *buf = api_malloc(150 * 100);
-  win = api_openwin(buf, 150, 100, -1, "hello");
-  api_boxfillwin(win, 6, 26, 143, 93, 0);
-  int x, y;
-  for (int i = 0; i < 1000; i++) {
-    x = (rand() % 137) + 6;
-    y = (rand() % 67) + 26;
-    api_point(win, x, y, 3);
+  char *buf = api_malloc(160 * 100);
+  win = api_openwin(buf, 160 , 100, -1, "new line");
+  for (int i = 0; i < 8; i++) {
+    api_linewin(win + 1, 8, 26, 77, i * 9 + 26, i);
+    api_linewin(win + 1, 88, 26, i * 9 + 88, 89, i);
   }
-  api_refreshwin(win, 6, 26, 144, 94);
+  api_refreshwin(win, 6, 26, 154, 90);
   api_end();
 }
