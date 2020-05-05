@@ -157,7 +157,7 @@ int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline)
       struct SHEET *sht;
       for (int i = 0; i < SHEET_MAX; i++) {
         sht = &(shtctl->sheets0[i]);
-        if(sht->flags != 0 && sht->task == task) {
+        if((sht->flags & 0x11) == 0x11 && sht->task == task) {
           sheet_free(sht);
         }
       }
@@ -349,6 +349,7 @@ int * hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int
   } else if (edx == 5) { // api_openwin
     struct SHEET *sht = sheet_alloc(shtctl);
     sht->task = task;
+    sht->flags |= 0x10;
     sheet_setbuf(sht, (char *) ebx + ds_base, esi, edi, eax);
     make_window8((char *) ebx + ds_base, esi, edi, (char *) ecx + ds_base, 0);
     sheet_slide(sht, 100, 50);
