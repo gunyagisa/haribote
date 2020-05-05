@@ -25,7 +25,6 @@ void init_pit(void)
   t->next = 0;
   timectl.t0 = t;
   timectl.next = 0xffffffff;
-  timectl.using = 1;
 }
 
 struct TIMER *timer_alloc(void)

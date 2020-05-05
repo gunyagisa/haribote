@@ -1,3 +1,5 @@
+#include "myfunc.h"
+
 int api_openwin(char *buf, int xsize, int ysize, int col_inv, char*title);
 void api_closewin(int win);
 void api_putstrwin(int win, int x, int y, int col, int len, char *str);
@@ -10,24 +12,6 @@ void api_point(int win, int x, int y, int col);
 void api_refreshwin(int win, int x0,int y0, int x1, int y1);
 void api_linewin(int win, int x0, int y0, int x1, int y1, int col);
 int api_getkey(int mode);
-
-#define a 16807
-#define m 2147483647
-#define q (m / a)
-#define r (m % a)
-
-static long int seed = 1;
-long int rand()
-{
-  long int hi = seed / q;
-  long int lo = seed % q;
-  long int test = a * lo - r * hi;
-  if (test > 0)
-    seed = test;
-  else
-    seed = test + m;
-  return seed;
-}
 
 void HariMain()
 {

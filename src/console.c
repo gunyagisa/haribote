@@ -431,7 +431,7 @@ int * hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int
   } else if (edx == 18) {
     settimer((struct TIMER *) ebx, eax);
   } else if (edx == 19) {
-    timer_free((struct TIMER *)ebx);
+    timer_free((struct TIMER *) ebx);
   }
   return 0;
 }

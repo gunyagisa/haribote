@@ -124,6 +124,7 @@ void HariMain(void)
   timer_init(timer, &fifo, 1);
   settimer(timer, 50);
 
+
   // sht_cons
   sht_cons = sheet_alloc(shtctl);
   buf_cons = (unsigned char *) memman_alloc_4k(memman, 256 * 165);
