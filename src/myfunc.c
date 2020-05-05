@@ -142,3 +142,20 @@ int strcmp(const char *s1, const char *s2)
 {
   return strncmp(s1, s2, strlen(s2));
 }
+
+#define a 16807
+#define m 2147483647
+#define q (m / a)
+#define r (m % a)
+long int rand()
+{
+  int seed = 1;
+  long int hi = seed / q;
+  long int lo = seed % q;
+  long int test = a * lo - r * hi;
+  if (test > 0)
+    seed = test;
+  else
+    seed = test + m;
+  return seed;
+}
