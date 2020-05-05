@@ -255,6 +255,9 @@ void HariMain(void)
             fifo32_put(&task_cons->fifo, 10 + 256);
           }
         }
+        if (d == 256 + 0x57 && shtctl->top > 2) { // F11
+          sheet_updown(shtctl->sheets[1], shtctl->top - 1);
+        }
         if (cursor_c >= 0) {
           boxfill8(sht_win->buf, sht_win->bxsize, cursor_c, cursor_x, 28, cursor_x + 7, 43);
         }
@@ -286,8 +289,19 @@ void HariMain(void)
           str_renderer_sht(sht_back, 0, 0, COL8_FFFFFF, COL8_008484, s, 10);
           sheet_slide(sht_mouse, mx, my);
           if ((mdec.btn & 0x01) != 0) {
-            // move sht_win
-            sheet_slide(sht_win, mx - 80, my - 8);
+            struct SHEET *sht;
+            int x, y;
+            for (int j = shtctl->top - 1; j > 0; j--) {
+              sht = shtctl->sheets[j];
+              x = mx - sht->vx0;
+              y = my - sht->vy0;
+              if (0 <= x && x <= sht->bxsize && 0 <= y && y <= sht->bysize) {
+                if (sht->buf[y * sht->bxsize + x] != sht->col_inv) {
+                  sheet_updown(sht, shtctl->top - 1);
+                  break;
+                }
+              }
+            }
           }
         }
       } else if (d <= 1){
