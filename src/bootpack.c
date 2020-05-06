@@ -62,7 +62,7 @@ void HariMain(void)
   struct MOUSE_DEC mdec;
   struct MEMMAN *memman = (struct MEMMAN *) MEMMAN_ADDR;
   struct SHTCTL *shtctl;
-  struct SHEET *sht_back, *sht_mouse, *sht, *key_win, *sht_cons[2];
+  struct SHEET *sht_back, *sht_mouse, *sht, *key_win;
   unsigned char *buf_back, buf_mouse[256];
 
   struct TASK *task_a, *task_cons[2], *task;
@@ -126,10 +126,8 @@ void HariMain(void)
   init_screen(buf_back, binfo->scrnx, binfo->scrny);
 
   // sht_cons
-  sht_cons[0] = open_console(shtctl, memtotal);
-  sht_cons[1] = 0;
-
-
+  key_win = open_console(shtctl, memtotal);
+  
   // sht_mouse
   sht_mouse = sheet_alloc(shtctl);
   sheet_setbuf(sht_mouse, buf_mouse, 16, 16, 99);
@@ -138,12 +136,11 @@ void HariMain(void)
   my = (binfo->scrny - 28 - 16) / 2;
 
   sheet_slide(sht_back, 0, 0);
-  sheet_slide(sht_cons[0], 32, 4);
+  sheet_slide(key_win, 32, 4);
   sheet_slide(sht_mouse, mx, my);
   sheet_updown(sht_back, 0);
-  sheet_updown(sht_cons[0], 1);
+  sheet_updown(key_win, 1);
   sheet_updown(sht_mouse, 2);
-  key_win = sht_cons[0];
   keywin_on(key_win);
 
   int mmx = -1, mmy = -1, mmx2 = 0;
@@ -222,13 +219,12 @@ void HariMain(void)
             io_sti();
           }
         }
-        if (d == 256 + 0x3c && key_shift != 0 && sht_cons[1] == 0) {
-          sht_cons[1] = open_console(shtctl, memtotal);
-          sheet_slide(sht_cons[1], 60, 40);
-          sheet_updown(sht_cons[1], shtctl->top);
+        if (d == 256 + 0x3c && key_shift != 0) {
           keywin_off(key_win);
-          key_win = sht_cons[1];
-          keywin_on(key_win);
+          key_win = open_console(shtctl, memtotal);
+          sheet_slide(key_win, 64, 40);
+          sheet_updown(key_win, shtctl->top);
+          keywin_off(key_win);
         }
         if (d == 256 + 0x45) { //numlock
           key_leds ^= 2;
