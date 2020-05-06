@@ -142,7 +142,7 @@ void HariMain(void)
   key_win = sht_cons[0];
   keywin_on(key_win);
 
-  int mmx = -1, mmy = -1;
+  int mmx = -1, mmy = -1, mmx2 = 0;
 
   fifo32_put(&keycmd, KEYCMD_LED);
   fifo32_put(&keycmd, key_leds);
@@ -241,7 +241,6 @@ void HariMain(void)
         }
       } else if (512 <= d && d <= 767) { //mouse
         if (mouse_decode(&mdec, d - 512) != 0) {
-          sprintf(s, "[lcr %d %d]", mdec.x, mdec.y);
           if ((mdec.btn & 0x01) != 0)
             s[1] = 'L';
           if ((mdec.btn & 0x02) != 0)
@@ -282,6 +281,7 @@ void HariMain(void)
                       // prepare for window move
                       mmx = mx;
                       mmy = my;
+                      mmx2 = sht->vx0;
                     }
                     if (sht->bxsize - 21 <= x && x <= sht->bxsize && sht->bysize - 5 && y < 19) {
                       if((sht->flags & 0x10) != 0) {
@@ -301,8 +301,7 @@ void HariMain(void)
               // window move
               x = mx - mmx;
               y = my - mmy;
-              sheet_slide(sht, sht->vx0 + x, sht->vy0 + y);
-              mmx = mx;
+              sheet_slide(sht, (mmx2 + x + 2) & ~3, sht->vy0 + y);
               mmy = my;
             }
           } else {
