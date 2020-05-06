@@ -331,6 +331,11 @@ void HariMain(void)
                         task->tss.eax = (int) &(task->tss.esp0);
                         task->tss.eip = (int) end_app_asm;
                         io_cli();
+                      } else {
+                        task = sht->task;
+                        io_cli();
+                        fifo32_put(&task->fifo, 4);
+                        io_sti();
                       }
                     }
                     break;
