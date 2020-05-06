@@ -143,6 +143,7 @@ void HariMain(void)
   keywin_on(key_win);
 
   int mmx = -1, mmy = -1, mmx2 = 0;
+  int new_mx = -1, new_my = 0, new_wx = 0x7fffffff, new_wy = 0;
 
   fifo32_put(&keycmd, KEYCMD_LED);
   fifo32_put(&keycmd, key_leds);
@@ -155,8 +156,18 @@ void HariMain(void)
     }
     io_cli();
     if (fifo32_status(&fifo) == 0) {
-      task_sleep(task_a);
-      io_sti();
+      if (new_mx >= 0) {
+        io_sti();
+        sheet_slide(sht_mouse, new_mx, new_my);
+        new_mx = -1;
+      } else if (new_wx != 0x7fffffff) {
+        io_sti();
+        sheet_slide(sht, new_wx, new_wy);
+        new_wx = 0x7fffffff;
+      } else {
+        task_sleep(task_a);
+        io_sti();
+      }
     } else {
       d = fifo32_get(&fifo);
       io_sti();
@@ -241,6 +252,8 @@ void HariMain(void)
         }
       } else if (512 <= d && d <= 767) { //mouse
         if (mouse_decode(&mdec, d - 512) != 0) {
+          new_mx = mx;
+          new_my = my;
           if ((mdec.btn & 0x01) != 0)
             s[1] = 'L';
           if ((mdec.btn & 0x02) != 0)
@@ -282,6 +295,7 @@ void HariMain(void)
                       mmx = mx;
                       mmy = my;
                       mmx2 = sht->vx0;
+                      new_wx = sht->vy0;
                     }
                     if (sht->bxsize - 21 <= x && x <= sht->bxsize && sht->bysize - 5 && y < 19) {
                       if((sht->flags & 0x10) != 0) {
@@ -301,11 +315,16 @@ void HariMain(void)
               // window move
               x = mx - mmx;
               y = my - mmy;
-              sheet_slide(sht, (mmx2 + x + 2) & ~3, sht->vy0 + y);
+              new_wx = (mmx2 + x + 2) & ~3;
+              new_wy = new_wy + y;
               mmy = my;
             }
           } else {
             mmx = -1;
+            if (new_wx != 0x7fffffff) {
+              sheet_slide(sht, new_wx, new_wy);
+              new_wx = 0x7fffffff;
+            }
           }
         }
       }
