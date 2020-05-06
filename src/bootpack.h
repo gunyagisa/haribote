@@ -43,6 +43,8 @@ typedef struct BOOTINFO {
   char *vram;
 } BOOTINFO;
 
+struct TASK *open_constask(struct SHEET *sht, unsigned int memtotal);
+
 // timer
 struct TIMER {
   struct TIMER *next;
@@ -58,6 +60,7 @@ struct TIMERCTL {
   struct TIMER timers0[MAX_TIMER];
 };
 extern struct TIMERCTL timectl;
+extern struct TIMER *task_timer;
 
 void init_pit(void);
 void settimer(struct TIMER *timer, unsigned int timeout);
@@ -102,7 +105,7 @@ struct TASKCTL {
   struct TASK tasks0[MAX_TASKS];
 };
 
-extern struct TIMER *task_timer;
+extern struct TASKCTL *taskctl;
 
 struct TASK * task_init(struct MEMMAN *memman);
 struct TASK *task_alloc(void);
@@ -136,6 +139,7 @@ void cmd_ls(struct CONSOLE *cons);
 void cmd_cat(struct CONSOLE *cons, int *fat, char *cmdline);
 void cmd_exit(struct CONSOLE *cons, int *fat);
 void cmd_start(struct CONSOLE *cons, char *cmdline, int memtotal);
+void cmd_ncst(struct CONSOLE *cons, char *cmdline, int memtotal);
 int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline);
 void cons_putstr0(struct CONSOLE *cons, char *s);
 void cons_putstr1(struct CONSOLE * cons,char *s, int n);
