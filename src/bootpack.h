@@ -85,6 +85,8 @@ struct TASK {
   int level, priority;
   struct TSS32 tss;
   struct FIFO32 fifo;
+  struct CONSOLE *cons;
+  int ds_base;
 };
 
 struct TASKLEVEL {
