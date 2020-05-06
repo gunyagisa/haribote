@@ -6,6 +6,7 @@ global api_putchar, api_end, api_putstr0, api_openwin, api_openwin, api_boxfillw
 global api_initmalloc, api_malloc, api_free
 global api_point, api_refreshwin, api_linewin, api_closewin, api_getkey
 global api_alloctimer, api_inittimer, api_settimer, api_freetimer
+global api_beep
 
 section .text
 
@@ -201,4 +202,10 @@ api_freetimer:
   mov   edx, 19
   mov   ebx, [esp + 8]
   pop   ebx
+  ret
+
+api_beep:
+  mov   edx, 20
+  mov   eax, [esp + 4]
+  int   0x40
   ret

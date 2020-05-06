@@ -34,7 +34,7 @@ $(BUILD)%.hrb: $(SRC)%.asm
 $(BUILD)%.hrb: $(BUILD)%.o $(BUILD)a_nasm.o $(BUILD)myfunc.o
 	ld $^ -o $@ -e HariMain -m elf_i386 -T binary.ld
 
-$(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys $(BUILD)hello.hrb $(BUILD)hello3.hrb $(BUILD)hello4.hrb $(BUILD)noodle.hrb $(BUILD)winhello.hrb Makefile
+$(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys $(BUILD)hello3.hrb $(BUILD)hello4.hrb $(BUILD)noodle.hrb $(BUILD)beepdown.hrb $(BUILD)winhello.hrb Makefile
 	mformat -f 1440 -C -B $< -i $@ ::
 	mcopy $(BUILD)geocide.sys -i $@ ::
 	mcopy $(SRC)ipl.asm -i $@ ::
