@@ -21,7 +21,6 @@ void HariMain()
   buf = api_malloc(144 * 164);
   win = api_openwin(buf, 144, 164, -1, "color");
   
-  int r, g, b;
   for (int y = 0; y < 128; y++) {
     for (int  x = 0; x < 128; x++) {
       buf[(x + 8) + (y + 28) * 144] = rgb2pal(x * 2, y * 2, 0, x , y);
