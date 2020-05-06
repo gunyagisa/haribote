@@ -199,6 +199,6 @@ api_settimer:
 api_freetimer:
   push  ebx
   mov   edx, 19
-  mov   ebx, [esp + 4]
+  mov   ebx, [esp + 8]
   pop   ebx
   ret

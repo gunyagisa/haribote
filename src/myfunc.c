@@ -15,6 +15,7 @@ int decimal(int n, char *str, int zero, int width)
   static char buf[13] = {0};
   int d = 10;
   int i = 0;
+  if (n == 0) buf[i++] = '0';
   while (n != 0) {
     buf[i++] = n % d + '0';
     n /= d;
@@ -29,6 +30,7 @@ int hex(unsigned int n, char *str, int zero, int width)
   static char buf[10] = {0};
   int d = 16;
   int i = 0;
+  if (n == 0) buf[i++] = '0';
   while (n != 0) {
     int tmp = n % d;
     if (tmp < 10) {

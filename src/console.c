@@ -338,6 +338,7 @@ int * hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int
   struct SHTCTL *shtctl = (struct SHTCTL *) *((int *) 0xfe4);
   struct TASK *task = task_now();
   int *reg = &eax + 1; // pushad value
+  struct SHEET *sht;
   
   if (edx == 1) {
     cons_putchar(cons, eax & 0xff, 1);
@@ -348,7 +349,7 @@ int * hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int
   } else if (edx == 4) {
     return &(task->tss.esp0);
   } else if (edx == 5) { // api_openwin
-    struct SHEET *sht = sheet_alloc(shtctl);
+    sht = sheet_alloc(shtctl);
     sht->task = task;
     sht->flags |= 0x10;
     sheet_setbuf(sht, (unsigned char *) ebx + ds_base, esi, edi, eax);
@@ -357,13 +358,13 @@ int * hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int
     sheet_updown(sht, 3);
     reg[7] = (int) sht;
   } else if (edx == 6) { // api_putstrwin
-    struct SHEET *sht = (struct SHEET *) (ebx & 0xfffffffe);
+    sht = (struct SHEET *) (ebx & 0xfffffffe);
     str_renderer8(sht->buf, sht->bxsize, eax, esi, edi, (char *) ebp + ds_base);
     if ((ebx & 1) == 0) {
       sheet_refresh(sht, esi, edi, esi + ecx * 8, edi + 16);
     }
   } else if (edx == 7) { // api_boxfilliwin
-    struct SHEET *sht = (struct SHEET *) (ebx & 0xfffffffe);
+    sht = (struct SHEET *) (ebx & 0xfffffffe);
     boxfill8(sht->buf, sht->bxsize, ebp, eax, ecx, esi, edi);
     if ((ebx & 1) == 0) {
       sheet_refresh(sht, eax, ecx, esi + 1, edi + 1);
@@ -379,16 +380,16 @@ int * hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int
     ecx = (ecx + 0x0f) & 0xfffffff0;
     memman_free_4k((struct MEMMAN *) (ebx + ds_base), eax, ecx);
   } else if (edx == 11) { // api_point
-    struct SHEET *sht = (struct SHEET *) (ebx & 0xfffffffe);
+    sht = (struct SHEET *) (ebx & 0xfffffffe);
     sht->buf[esi + edi * sht->bxsize] = eax;
     if ((ebx & 1) == 0) {
       sheet_refresh(sht, esi, edi, esi + 1, edi + 1);
     }
   } else if (edx == 12) { // api_refreshwin
-    struct SHEET *sht = (struct SHEET *) ebx;
+    sht = (struct SHEET *) ebx;
     sheet_refresh(sht, eax, ecx, esi, edi);
   } else if (edx == 13) {
-    struct SHEET *sht = (struct SHEET *) (ebx & 0xfffffffe);
+    sht = (struct SHEET *) (ebx & 0xfffffffe);
     hrb_api_linewin(sht, eax, ecx, esi, edi, ebp);
     if ((ebx & 1) == 0) {
       sheet_refresh(sht, eax, ecx, esi + 1, edi + 1);
@@ -450,7 +451,7 @@ int *inthandler0c(int *esp)
   struct TASK *task = task_now();
   char s[30];
   cons_putstr0(cons, "\nINT 0C :\n Stack Exception.\n");
-  sprintf(s, "EIP = %d/n", esp[11]);
+  sprintf(s, "EIP = %x/n", esp[11]);
   cons_putstr0(cons, s);
   return &(task->tss.esp0);
 }
