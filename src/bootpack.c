@@ -49,9 +49,8 @@ void HariMain(void)
   struct SHEET *sht_back, *sht_mouse, *sht_win, *sht_cons[2], *sht, *key_win;
   unsigned char *buf_back, buf_mouse[256], *buf_win, *buf_cons[2];
 
-  struct TASK *task_a, *task_cons[2];
+  struct TASK *task_a, *task_cons[2], *task;
   struct TIMER *timer;
-  struct CONSOLE *cons;
 
   static char keytable0[0x80] = {
     0,   0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '^',   0,   0,
@@ -148,7 +147,6 @@ void HariMain(void)
     sht_cons[i]->flags |= 0x20;
   }
 
-  key_win = sht_win;
 
   // sht_mouse
   sht_mouse = sheet_alloc(shtctl);
@@ -167,6 +165,7 @@ void HariMain(void)
   sheet_updown(sht_cons[0], 2);
   sheet_updown(sht_win, 3);
   sheet_updown(sht_mouse, 4);
+  key_win = sht_win;
 
   int mmx = -1, mmy = -1;
 
@@ -246,13 +245,15 @@ void HariMain(void)
           fifo32_put(&keycmd, KEYCMD_LED);
           fifo32_put(&keycmd, key_leds);
         }
-        if (d == 256 + 0x3b && key_shift != 0 && task_cons[0]->tss.ss0 != 0) {
-          cons = (struct CONSOLE *) *((int *) 0xfec);
-          cons_putstr0(cons, "\nBreak(KEY) :\n");
-          io_cli();
-          task_cons[0]->tss.eax = (int) &(task_cons[0]->tss.esp0);
-          task_cons[0]->tss.eip = (int) end_app_asm;
-          io_sti();
+        if (d == 256 + 0x3b && key_shift != 0 && key_shift != 0) {
+          task = key_win->task;
+          if (task != 0 && task->tss.ss0 != 0) {
+            cons_putstr0(task->cons, "\nBreak(KEY) :\n");
+            io_cli();
+            task->tss.eax = (int) &(task->tss.esp0);
+            task->tss.eip = (int) end_app_asm;
+            io_sti();
+          }
         }
         if (d == 256 + 0x45) { //numlock
           key_leds ^= 2;
@@ -339,11 +340,11 @@ void HariMain(void)
                     }
                     if (sht->bxsize - 21 <= x && x <= sht->bxsize && sht->bysize - 5 && y < 19) {
                       if((sht->flags & 0x10) != 0) {
-                        cons = (struct CONSOLE *) *((int *) 0xfec);
-                        cons_putstr0(cons, "\nBreak(mouse) :\n");
+                        task = sht->task;
+                        cons_putstr0(task->cons, "\nBreak(mouse) :\n");
                         io_cli();
-                        task_cons[0]->tss.eax = (int) &(task_cons[0]->tss.esp0);
-                        task_cons[0]->tss.eip = (int) end_app_asm;
+                        task->tss.eax = (int) &(task->tss.esp0);
+                        task->tss.eip = (int) end_app_asm;
                         io_cli();
                       }
                     }
