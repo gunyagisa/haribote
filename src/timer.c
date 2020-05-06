@@ -85,7 +85,6 @@ void settimer(struct TIMER *timer, unsigned int timeout)
   timer->flags = TIMER_FLAGS_USING;
   e = io_load_eflags();
   io_cli();
-  timectl.using++;
   t = timectl.t0;
   if (timer->timeout <= t->timeout) {
     timectl.t0 = timer;

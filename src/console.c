@@ -185,14 +185,12 @@ void console_task(struct SHEET *sht, unsigned int memtotal)
   cons.cur_x = 8;
   cons.cur_y = 28;
   cons.cur_c  = -1;
-  cons.timer = timer_alloc();
-  timer_init(cons.timer, &task->fifo, 1);
-  settimer(cons.timer, 50);
-
-
   *((int *) 0xfec) = (int) &cons;
 
+  cons.timer = timer_alloc();
   fifo32_init(&task->fifo, 128, fifobuf, task);
+  timer_init(cons.timer, &task->fifo, 1);
+  settimer(cons.timer, 50);
   file_readfat(fat, (unsigned char *) (DISKIMG_ADDR + 0x000200));
 
   cons_putchar(&cons, '>', 1);

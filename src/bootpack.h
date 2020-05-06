@@ -44,18 +44,17 @@ typedef struct BOOTINFO {
 } BOOTINFO;
 
 // timer
-extern struct TIMER *task_timer;
 struct TIMER {
   struct TIMER *next;
   unsigned int timeout, flags;
-  FIFO32 *fifo;
-  unsigned char data;
+  struct FIFO32 *fifo;
+  int data;
 };
 
 struct TIMERCTL {
-  unsigned int count, next, using;
-  struct TIMER timers0[MAX_TIMER];
+  unsigned int count, next;
   struct TIMER *t0;
+  struct TIMER timers0[MAX_TIMER];
 };
 extern struct TIMERCTL timectl;
 
@@ -98,6 +97,7 @@ struct TASKCTL {
   struct TASK tasks0[MAX_TASKS];
 };
 
+extern struct TIMER *task_timer;
 
 struct TASK * task_init(struct MEMMAN *memman);
 struct TASK *task_alloc(void);
