@@ -24,7 +24,9 @@ void cons_putchar(struct CONSOLE *cons, int chr, char move)
   } else if (s[0] == 0x0d) { // CR
     // nothing
   } else { // normal chara
-    str_renderer_sht(cons->sht, cons->cur_x, cons->cur_y, COL8_FFFFFF, COL8_000000, s, 1); if (move != 0) { cons->cur_x += 8;
+    str_renderer_sht(cons->sht, cons->cur_x, cons->cur_y, COL8_FFFFFF, COL8_000000, s, 1); 
+    if (move != 0) { 
+      cons->cur_x += 8;
       if (cons->cur_x == 8 + 240) {
         cons_newline(cons);
       }
@@ -45,11 +47,28 @@ void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, unsigned int mem
     cmd_cat(cons, fat, cmdline);
   } else if (strcmp(cmdline, "exit") == 0) {
     cmd_exit(cons, fat);
+  } else if (strncmp(cmdline, "start ", 6) == 0) {
+    cmd_start(cons, cmdline, memtotal);
   } else if (cmdline[0] != 0) {
     if (cmd_app(cons, fat, cmdline) == 0) {
       cons_putstr0(cons, "Bad command.\n\n");
     }
   }
+}
+
+void cmd_start(struct CONSOLE *cons, char *cmdline, int memtotal)
+{
+  struct SHTCTL *shtctl = (struct SHTCTL *) *((int *) 0xfe4);
+  struct SHEET *sht = open_console(shtctl, memtotal);
+  struct FIFO32 *fifo = &sht->task->fifo;
+  sheet_slide(sht, 100, 100);
+  sheet_updown(sht, shtctl->top);
+
+  for (int i = 6; cmdline[i] != 0; i++) {
+    fifo32_put(fifo, cmdline[i] + 256);
+  }
+  fifo32_put(fifo, 10 + 256);
+  cons_newline(cons);
 }
 
 void cmd_exit(struct CONSOLE *cons, int *fat)
@@ -238,7 +257,7 @@ void console_task(struct SHEET *sht, unsigned int memtotal)
         cons.cur_c = COL8_FFFFFF;
       }
       if (i == 3) { // cursor off
-        boxfill8(sht->buf, sht->bxsize, COL8_000000, cons.cur_x, 28, cons.cur_x + 7, 43);
+        boxfill8(sht->buf, sht->bxsize, COL8_000000, cons.cur_x, cons.cur_y, cons.cur_x + 7, cons.cur_y + 15);
         cons.cur_c = -1;
       }
       if (i == 4) {
