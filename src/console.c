@@ -32,6 +32,7 @@ void cons_putchar(struct CONSOLE *cons, int chr, char move)
   }
 }
 
+
 void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, unsigned int memtotal)
 {
   if (strcmp(cmdline, "mem") == 0) {
@@ -161,6 +162,7 @@ int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline)
           sheet_free(sht);
         }
       }
+      timer_cancelall(&task->fifo);
       memman_free_4k(memman, (int) q, segsiz);
     } else {
       cons_putstr0(cons, ".hrb file format error.\n");
@@ -425,6 +427,7 @@ int * hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int
     }
   } else if (edx == 16) {
     reg[7] = (int) timer_alloc();
+    ((struct TIMER *) reg[7])->flags2 = 1; // auto cancel
   } else if (edx == 17) {
     timer_init((struct TIMER *) ebx, &task->fifo, eax + 256);
   } else if (edx == 18) {

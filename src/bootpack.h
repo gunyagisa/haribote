@@ -46,7 +46,8 @@ typedef struct BOOTINFO {
 // timer
 struct TIMER {
   struct TIMER *next;
-  unsigned int timeout, flags;
+  unsigned int timeout;
+  char flags, flags2;
   struct FIFO32 *fifo;
   int data;
 };
@@ -63,6 +64,8 @@ void settimer(struct TIMER *timer, unsigned int timeout);
 struct TIMER *timer_alloc(void);
 void timer_init(struct TIMER *timer, FIFO32 *fifo, int data);
 void timer_free(struct TIMER *timer);
+int timer_cancel(struct TIMER *timer);
+void timer_cancelall(struct FIFO32 *fifo);
 
 //mtask
 #define MAX_TASKS       1000
