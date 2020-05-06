@@ -30,7 +30,7 @@ void HariMain(void)
   struct BOOTINFO *binfo = (BOOTINFO *) BOOTINFO_ADDR;
   char s[40];
   struct FIFO32 fifo, keycmd;
-  int fifobuf[128], keycmd_buf[32];
+  int fifobuf[128], keycmd_buf[32], *cons_fifo[2];
   int mx, my, d;
   struct MOUSE_DEC mdec;
   struct MEMMAN *memman = (struct MEMMAN *) MEMMAN_ADDR;
@@ -119,6 +119,8 @@ void HariMain(void)
     task_run(task_cons[i], 2, 2);
     sht_cons[i]->task = task_cons[i];
     sht_cons[i]->flags |= 0x20;
+    cons_fifo[i] = (int *) memman_alloc_4k(memman, 128 * 4);
+    fifo32_init(&task_cons[i]->fifo, 128, cons_fifo[i], task_cons[i]);
   }
 
 
@@ -138,8 +140,12 @@ void HariMain(void)
   sheet_updown(sht_cons[0], 2);
   sheet_updown(sht_mouse, 3);
   key_win = sht_cons[0];
+  keywin_on(key_win);
 
   int mmx = -1, mmy = -1;
+
+  fifo32_put(&keycmd, KEYCMD_LED);
+  fifo32_put(&keycmd, key_leds);
 
   for (;;) {
     if (fifo32_status(&keycmd) > 0 && keycmd_wait < 0) {

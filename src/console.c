@@ -177,10 +177,9 @@ int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline)
 void console_task(struct SHEET *sht, unsigned int memtotal)
 {
   struct TASK *task = task_now();
-  int i, fifobuf[128];
-  char cmdline[30];
   struct MEMMAN *memman = (struct MEMMAN *) MEMMAN_ADDR;
-  int *fat = (int *) memman_alloc_4k(memman, 4 * 2800);
+  int i, *fat = (int *) memman_alloc_4k(memman, 4 * 2800);
+  char cmdline[30];
 
   struct CONSOLE cons;
   cons.sht = sht;
@@ -190,7 +189,6 @@ void console_task(struct SHEET *sht, unsigned int memtotal)
   task->cons = &cons;
 
   cons.timer = timer_alloc();
-  fifo32_init(&task->fifo, 128, fifobuf, task);
   timer_init(cons.timer, &task->fifo, 1);
   settimer(cons.timer, 50);
   file_readfat(fat, (unsigned char *) (DISKIMG_ADDR + 0x000200));
