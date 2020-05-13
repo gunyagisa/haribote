@@ -1,7 +1,7 @@
 OBJ = bootpack.o dsctbl.o fifo.o graphic.o hankaku.o interrupt.o keyboard.o mouse.o nasmfunc.o memory.o sheet.o timer.o mtask.o window.o console.o file.o myfunc.o
 HRB = beepdown.hrb color.hrb hello.hrb hello3.hrb hello4.hrb winhello.hrb
 BUILD = ./build-cache/
-SRC = ./src/
+SRC = ./haribote/
 APP_SRC = ./app/
 
 QEMU = qemu-system-i386
