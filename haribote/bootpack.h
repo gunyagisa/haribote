@@ -92,6 +92,14 @@ struct TASK {
   struct FIFO32 fifo;
   struct CONSOLE *cons;
   int ds_base, cons_stack;
+  struct FILEHANDLE *fhandle;
+  int *fat;
+};
+
+struct FILEHANDLE {
+  char *buf;
+  int size;
+  int pos;
 };
 
 struct TASKLEVEL {
