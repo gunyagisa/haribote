@@ -4,6 +4,7 @@
 #include "sheet.h"
 #include "fifo.h"
 #include "graphic.h"
+#include "dsctbl.h"
 
 #define BOOTINFO_ADDR 	0x00000ff0
 #define DISKIMG_ADDR    0x00100000
@@ -87,6 +88,7 @@ struct TASK {
   int sel, flags;
   int level, priority;
   struct TSS32 tss;
+  struct SEGMENT_DESCRIPTOR ldt[2];
   struct FIFO32 fifo;
   struct CONSOLE *cons;
   int ds_base, cons_stack;

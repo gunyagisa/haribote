@@ -172,7 +172,6 @@ void cmd_cat(struct CONSOLE *cons, int *fat, char *cmdline)
 int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline)
 {
   struct MEMMAN *memman = (struct MEMMAN *) MEMMAN_ADDR;
-  struct SEGMENT_DESCRIPTOR *gdt = (struct SEGMENT_DESCRIPTOR *) GDT_ADDR;
   char *p, name[18], *q;
   struct TASK *task = task_now();
   int segsiz, datsiz, esp, dathrb;
@@ -204,12 +203,12 @@ int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline)
       dathrb = *((int *) (p + 0x0014));
       q = (char *) memman_alloc_4k(memman, segsiz);
       task->ds_base = (int) q;
-      set_sgmntdsc(gdt + task->sel / 8 + 1000, finfo->size - 1, (int) p, AR_CODE32_ER + 0x60); // code segment
-      set_sgmntdsc(gdt + task->sel / 8 + 2000, segsiz - 1, (int) q, AR_DATA32_RW + 0x60); // data segment
+      set_sgmntdsc(task->ldt + 0, finfo->size - 1, (int) p, AR_CODE32_ER + 0x60); // code segment
+      set_sgmntdsc(task->ldt + 1, segsiz - 1, (int) q, AR_DATA32_RW + 0x60); // data segment
       for (int i = 0; i < datsiz; i++) {
         q[esp + i] = p[dathrb + i];
       }
-      start_app(0x1b, task->sel + 1000 * 8, esp, task->sel + 2000 * 8, &(task->tss.esp0));
+      start_app(0x1b, 0 * 8 + 4, esp, 1 * 8 + 4, &(task->tss.esp0));
       struct SHTCTL *shtctl = (struct SHTCTL *) *((int *) 0xfe4);
       struct SHEET *sht;
       for (int i = 0; i < SHEET_MAX; i++) {
