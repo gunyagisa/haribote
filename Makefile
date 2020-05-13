@@ -1,6 +1,8 @@
 OBJ = bootpack.o dsctbl.o fifo.o graphic.o hankaku.o interrupt.o keyboard.o mouse.o nasmfunc.o memory.o sheet.o timer.o mtask.o window.o console.o file.o myfunc.o
+HRB = beepdown.hrb color.hrb hello.hrb hello3.hrb hello4.hrb winhello.hrb
 BUILD = ./build-cache/
 SRC = ./src/
+APP_SRC = ./app/
 
 QEMU = qemu-system-i386
 CC = clang
@@ -22,19 +24,22 @@ $(BUILD)nasmfunc.o: $(SRC)nasmfunc.asm Makefile
 	nasm -f elf32 -o $@ $<
 
 $(BUILD)bootpack.bin: $(addprefix $(BUILD), $(OBJ))
-	ld -m elf_i386  -e HariMain -o $@ $^ -T har.ld -Map mapfile
+	ld -m elf_i386  -e HariMain -o $@ $^ -T har.ld
 
 $(BUILD)geocide.sys: $(BUILD)asmhead.bin $(BUILD)bootpack.bin
 	cat $< $(BUILD)bootpack.bin > $@
 
-$(BUILD)%.hrb: $(SRC)%.asm
+$(BUILD)%.o: $(APP_SRC)%.c
+	$(CC) $(CFLAGS) $< -o $@
+
+$(BUILD)%.hrb: $(APP_SRC)%.asm
 	nasm -f elf32 -o $(BUILD)tmp.o $<
 	ld $(BUILD)tmp.o -o $@ -e HariMain -m elf_i386 -T binary.ld
 
-$(BUILD)%.hrb: $(BUILD)%.o $(BUILD)a_nasm.o $(BUILD)myfunc.o
-	ld $^ -o $@ -e HariMain -m elf_i386 -T binary.ld
+$(BUILD)%.hrb: $(BUILD)%.o 
+	ld $^ -o $@ -e HariMain -m elf_i386 -T binary.ld -L $(APP_SRC) -lapi
 
-$(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys $(BUILD)hello3.hrb $(BUILD)hello4.hrb $(BUILD)noodle.hrb $(BUILD)beepdown.hrb $(BUILD)winhello.hrb $(BUILD)color.hrb Makefile
+$(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys $(addprefix $(BUILD), $(HRB)) Makefile
 	mformat -f 1440 -C -B $< -i $@ ::
 	mcopy $(BUILD)geocide.sys -i $@ ::
 	mcopy $(SRC)ipl.asm -i $@ ::
