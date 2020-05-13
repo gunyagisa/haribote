@@ -244,7 +244,7 @@ void console_task(struct SHEET *sht, unsigned int memtotal)
   cons.cur_c  = -1;
   task->cons = &cons;
 
-  if (sht != 0) {
+  if (cons.sht != 0) {
     cons.timer = timer_alloc();
     timer_init(cons.timer, &task->fifo, 1);
     settimer(cons.timer, 50);
@@ -262,7 +262,7 @@ void console_task(struct SHEET *sht, unsigned int memtotal)
     } else {
       i = fifo32_get(&task->fifo);
       io_sti();
-      if ( i <= 1) {
+      if ( i <= 1 && cons.sht != 0) {
         if (i != 0) {
           timer_init(cons.timer, &task->fifo, 0);
           if (cons.cur_c >= 0) {
@@ -280,7 +280,10 @@ void console_task(struct SHEET *sht, unsigned int memtotal)
         cons.cur_c = COL8_FFFFFF;
       }
       if (i == 3) { // cursor off
-        boxfill8(sht->buf, sht->bxsize, COL8_000000, cons.cur_x, cons.cur_y, cons.cur_x + 7, cons.cur_y + 15);
+        if (cons.sht != 0) {
+          boxfill8(cons.sht->buf, cons.sht->bxsize, COL8_000000, cons.cur_x, 
+              cons.cur_y, cons.cur_x + 7, cons.cur_y + 15);
+        }
         cons.cur_c = -1;
       }
       if (i == 4) {
@@ -297,7 +300,7 @@ void console_task(struct SHEET *sht, unsigned int memtotal)
           cmdline[cons.cur_x / 8 - 2] = 0;
           cons_newline(&cons);
           cons_runcmd(cmdline, &cons, fat, memtotal);
-          if (sht == 0) {
+          if (cons.sht == 0) {
             cmd_exit(&cons, fat);
           }
           cons_putchar(&cons, '>', 1);
@@ -308,11 +311,12 @@ void console_task(struct SHEET *sht, unsigned int memtotal)
           }
         }
       }
-      if (sht != 0) {
+      if (cons.sht != 0) {
         if(cons.cur_c >= 0) {
-          boxfill8(sht->buf, sht->bxsize, cons.cur_c, cons.cur_x, cons.cur_y, cons.cur_x + 7, cons.cur_y + 15);
+          boxfill8(cons.sht->buf, cons.sht->bxsize, cons.cur_c, cons.cur_x, cons.cur_y, 
+              cons.cur_x + 7, cons.cur_y + 15);
         }
-        sheet_refresh(sht, cons.cur_x, cons.cur_y, cons.cur_x + 8, cons.cur_y + 16);
+        sheet_refresh(cons.sht, cons.cur_x, cons.cur_y, cons.cur_x + 8, cons.cur_y + 16);
       }
     }
   }
@@ -407,6 +411,7 @@ int * hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int
   struct SHTCTL *shtctl = (struct SHTCTL *) *((int *) 0xfe4);
   int *reg = &eax + 1; // pushad value
   struct SHEET *sht;
+  struct FIFO32 *sys_fifo = (struct FIFO32 *) *((int *) 0xfec);
   
   if (edx == 1) {
     cons_putchar(cons, eax & 0xff, 1);
@@ -487,6 +492,13 @@ int * hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int
       }
       if (i == 3) {
         cons->cur_c = -1;
+      }
+      if (i == 4) {
+        timer_cancel(cons->timer);
+        io_cli();
+        fifo32_put(sys_fifo, cons->sht - shtctl->sheets0 + 2024);
+        cons->sht = 0;
+        io_sti();
       }
       if (256 <= i) {
         reg[7] = i - 256;
