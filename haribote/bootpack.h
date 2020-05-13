@@ -95,6 +95,7 @@ struct TASK {
   struct FILEHANDLE *fhandle;
   int *fat;
   char *cmdline;
+  char langmode;
 };
 
 struct FILEHANDLE {
@@ -147,8 +148,8 @@ void cons_runcmd(char *, struct CONSOLE *, int *, unsigned int);
 void cmd_mem(struct CONSOLE *cons, unsigned int memtotal);
 void cmd_clear(struct CONSOLE *cons);
 void cmd_ls(struct CONSOLE *cons);
-void cmd_cat(struct CONSOLE *cons, int *fat, char *cmdline);
 void cmd_exit(struct CONSOLE *cons, int *fat);
+void cmd_langmode(struct CONSOLE *cons, char *cmdline);
 void cmd_start(struct CONSOLE *cons, char *cmdline, int memtotal);
 void cmd_ncst(struct CONSOLE *cons, char *cmdline, int memtotal);
 int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline);

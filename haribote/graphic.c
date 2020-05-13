@@ -100,9 +100,20 @@ void font_renderer8(unsigned char *vram, int xsize, char color_code, int x, int 
 void str_renderer8(unsigned char *buf, int xsize, char color_code, int x, int y, char *str)
 {
   extern char hankaku[4096];
-  for (;*str != 0x00;str++) {
-    font_renderer8(buf, xsize, color_code, x, y, hankaku + *str * 16);
-    x += 8;
+  struct TASK *task = task_now();
+  char *nihongo = (char *) *((int *) 0xfe8);
+
+  if (task->langmode == 0) {
+    for (; *str != 0x00; str++) {
+      font_renderer8(buf, xsize, color_code, x, y, hankaku + *str * 16);
+      x += 8;
+    }
+  }
+  if (task->langmode == 1) {
+    for (;*str != 0x00;str++) {
+      font_renderer8(buf, xsize, color_code, x, y, hankaku + *str * 16);
+      x += 8;
+    }
   }
 }
 

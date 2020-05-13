@@ -92,6 +92,8 @@ void HariMain(void)
 
   struct TASK *task_a, *task;
 
+  extern char hankaku[4096];
+
   static char keytable0[0x80] = {
     0,   0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '^',   0x08,   0,
     'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '@', '[',   0x0a,   0, 'A', 'S',
@@ -140,8 +142,27 @@ void HariMain(void)
 
   init_palette();	//configure color setting
 
+  unsigned char *nihongo = memman_alloc_4k(memman, 16 * 256 + 32 * 94 * 47);
+  int *fat = (int *) memman_alloc_4k(memman, 4 * 2800);
+  file_readfat(fat, (unsigned char *) (DISKIMG_ADDR + 0x000200));
+  struct FILEINFO *finfo = file_search("jpn16v00.fnt", 
+      (struct FILEINFO *) finfo, (char *) (DISKIMG_ADDR + 0x002600));
+  if (finfo != 0) {
+    file_loadfile(finfo->clustno, finfo->size, nihongo, fat, (char *) (DISKIMG_ADDR + 0x003e00));
+  } else {
+    for (int i = 0; i < 16 * 256; i++) {
+      nihongo[i] = hankaku[i];
+    }
+    for (int i = 16; i < 16 * 256 + 32 * 94 * 47; i++) {
+      nihongo[i] = 0xff;
+    }
+  }
+  *((int *) 0xfe8) = (int) nihongo;
+  memman_free_4k(memman, (int) fat, 4 * 2880);
+
   shtctl = shtctl_init(memman, (unsigned char *)binfo->vram, binfo->scrnx, binfo->scrny);
   *((int *) 0xfe4) = (int) shtctl;
+  task_a->langmode = 0;
   task_a = task_init(memman);
   fifo.task = task_a;
   task_run(task_a, 1, 0);

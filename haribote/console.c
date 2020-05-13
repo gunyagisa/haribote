@@ -46,8 +46,8 @@ void cons_runcmd(char *cmdline, struct CONSOLE *cons, int *fat, unsigned int mem
     cmd_clear(cons);
   }else if (strcmp(cmdline, "ls") == 0 && cons->sht != 0) {
     cmd_ls(cons);
-  } else if (strncmp(cmdline, "cat ", 4) == 0 && cons->sht != 0) {
-    cmd_cat(cons, fat, cmdline);
+  } else if (strncmp(cmdline, "langmode ", 9) == 0) {
+    cmd_langmode(cons, cmdline);
   } else if (strcmp(cmdline, "exit") == 0) {
     cmd_exit(cons, fat);
   } else if (strncmp(cmdline, "start ", 6) == 0) {
@@ -150,21 +150,15 @@ void cmd_ls(struct CONSOLE *cons)
   cons_newline(cons);
 }
 
-void cmd_cat(struct CONSOLE *cons, int *fat, char *cmdline)
+void cmd_langmode(struct CONSOLE *cons, char *cmdline)
 {
-  struct MEMMAN *memman = (struct MEMMAN *) MEMMAN_ADDR;
-  struct FILEINFO *finfo = file_search(cmdline + 4, (struct FILEINFO *) (DISKIMG_ADDR + 0x002600), 224);
-  char *p;
-  
-  if (finfo != 0) {
-    p = (char *) memman_alloc_4k(memman, finfo->size);
-    file_loadfile(finfo->clustno, finfo->size, p, fat, (char *) (DISKIMG_ADDR + 0x003e00));
-    for (int i = 0; i < finfo->size; i++) {
-      cons_putchar(cons, p[i], 1);
-    }
-    memman_free_4k(memman, (int) p, finfo->size);
+  struct TASK *task = task_now();
+  unsigned char mode = cmdline[9] - '0';
+
+  if (mode <= 1) {
+    task->langmode = mode;
   } else {
-    cons_putstr0(cons, "File not found.\n");
+    cons_putstr0(cons, "mode number error.\n");
   }
   cons_newline(cons);
 }
@@ -242,7 +236,13 @@ void console_task(struct SHEET *sht, unsigned int memtotal)
   int i, *fat = (int *) memman_alloc_4k(memman, 4 * 2800);
   char cmdline[30];
   struct FILEHANDLE fhandle[8];
+  unsigned char *nihongo = (char *) *((int *) 0xfe8);
 
+  if (nihongo[4096] != 0xff) {
+    task->langmode = 1;
+  } else {
+    task->langmode = 0;
+  }
   struct CONSOLE cons;
   cons.sht = sht;
   cons.cur_x = 8;
