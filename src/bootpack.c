@@ -248,6 +248,7 @@ void HariMain(void)
             task->tss.eax = (int) &(task->tss.esp0);
             task->tss.eip = (int) end_app_asm;
             io_sti();
+            task_run(task, -1, 0);
           }
         }
         if (d == 256 + 0x3c && key_shift != 0) {
@@ -337,6 +338,7 @@ void HariMain(void)
                         task->tss.eax = (int) &(task->tss.esp0);
                         task->tss.eip = (int) end_app_asm;
                         io_cli();
+                        task_run(task, -1, 0);
                       } else {
                         task = sht->task;
                         io_cli();
