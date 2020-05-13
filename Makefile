@@ -37,7 +37,7 @@ $(BUILD)%.hrb: $(APP_SRC)%.asm
 	ld $(BUILD)tmp.o -o $@ -e HariMain -m elf_i386 -T binary.ld
 
 $(BUILD)%.hrb: $(BUILD)%.o 
-	ld $^ -o $@ -e HariMain -m elf_i386 -T binary.ld -L $(APP_SRC) -lapi -L $(APP_SRC) -lfunc
+	ld $^ -o $@ -e HariMain -m elf_i386 -T binary.ld -L $(APP_SRC) -lapi -lfunc
 
 $(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys $(addprefix $(BUILD), $(HRB)) Makefile
 	mformat -f 1440 -C -B $< -i $@ ::

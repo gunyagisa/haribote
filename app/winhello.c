@@ -3,8 +3,7 @@
 void HariMain()
 {
   int win;
-  api_initmalloc();
-  char *buf = api_malloc(160 * 100);
+  char buf[160 * 100];
   win = api_openwin(buf, 160 , 100, -1, "new line");
   for (int i = 0; i < 8; i++) {
     api_linewin(win + 1, 8, 26, 77, i * 9 + 26, i);

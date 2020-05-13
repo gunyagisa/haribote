@@ -1,7 +1,7 @@
 #include "applib.h"
 #include "myfunc.h"
 
-#define MAX     100000
+#define MAX     1000
 
 void HariMain(void)
 {
