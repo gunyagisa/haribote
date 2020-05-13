@@ -1,5 +1,5 @@
 OBJ = bootpack.o dsctbl.o fifo.o graphic.o hankaku.o interrupt.o keyboard.o mouse.o nasmfunc.o memory.o sheet.o timer.o mtask.o window.o console.o file.o myfunc.o
-HRB = beepdown.hrb color.hrb hello.hrb hello3.hrb hello4.hrb winhello.hrb
+HRB = beepdown.hrb color.hrb hello.hrb hello3.hrb hello4.hrb winhello.hrb sosu.hrb
 BUILD = ./build-cache/
 SRC = ./haribote/
 APP_SRC = ./app/
@@ -37,7 +37,7 @@ $(BUILD)%.hrb: $(APP_SRC)%.asm
 	ld $(BUILD)tmp.o -o $@ -e HariMain -m elf_i386 -T binary.ld
 
 $(BUILD)%.hrb: $(BUILD)%.o 
-	ld $^ -o $@ -e HariMain -m elf_i386 -T binary.ld -L $(APP_SRC) -lapi
+	ld $^ -o $@ -e HariMain -m elf_i386 -T binary.ld -L $(APP_SRC) -lapi -L $(APP_SRC) -lfunc
 
 $(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys $(addprefix $(BUILD), $(HRB)) Makefile
 	mformat -f 1440 -C -B $< -i $@ ::

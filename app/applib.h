@@ -1,5 +1,5 @@
 void api_putchar(int c);
-void api_puststr0(char *s);
+void api_putstr0(char *s);
 void apit_putstr1(char *s, int l);
 int api_openwin(char *buf, int xsize, int ysize, int col_inv, char*title);
 void api_closewin(int win);
