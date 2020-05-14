@@ -1,21 +1,22 @@
 #include <stdarg.h>
+#include "myfunc.h"
 
-int string(const char *, char *, int ,int);
+int string(const char *, char *, int, int);
 
-void str_reverse(char *str, int size)
-{
-  for (int j = 0;j < size / 2;++j) {
+void str_reverse(char *str, int size) {
+  for (int j = 0; j < size / 2; ++j) {
     char tmp = str[size - 1 - j];
-    str[size - 1 - j] = str[j]; str[j] = tmp;
+    str[size - 1 - j] = str[j];
+    str[j] = tmp;
   }
 }
 
-int decimal(int n, char *str, int zero, int width)
-{
+int decimal(int n, char *str, int zero, int width) {
   static char buf[13] = {0};
   int d = 10;
   int i = 0;
-  if (n == 0) buf[i++] = '0';
+  if (n == 0)
+    buf[i++] = '0';
   while (n != 0) {
     buf[i++] = n % d + '0';
     n /= d;
@@ -25,12 +26,12 @@ int decimal(int n, char *str, int zero, int width)
   return i;
 }
 
-int hex(unsigned int n, char *str, int zero, int width)
-{
+int hex(unsigned int n, char *str, int zero, int width) {
   static char buf[10] = {0};
   int d = 16;
   int i = 0;
-  if (n == 0) buf[i++] = '0';
+  if (n == 0)
+    buf[i++] = '0';
   while (n != 0) {
     int tmp = n % d;
     if (tmp < 10) {
@@ -47,8 +48,7 @@ int hex(unsigned int n, char *str, int zero, int width)
   return i;
 }
 
-int string(const char *n, char *str, int zero, int width)
-{
+int string(const char *n, char *str, int zero, int width) {
   int i = 0;
   while (*n != '\0') {
     *(str++) = *(n++);
@@ -57,8 +57,7 @@ int string(const char *n, char *str, int zero, int width)
   return i;
 }
 
-int vsprintf(char *str, const char *fmt, va_list arg)
-{
+int vsprintf(char *str, const char *fmt, va_list arg) {
   int len = 0;
   int size = 0;
   int zeroflag, width;
@@ -75,19 +74,19 @@ int vsprintf(char *str, const char *fmt, va_list arg)
         width = *(fmt++) - '0';
       }
       switch (*fmt) {
-        case 'd':
-          size = decimal(va_arg(arg, int),str,zeroflag, width);
-          break;
-        case 'x':
-          size = hex(va_arg(arg, int), str, zeroflag, width);
-          break;
-        case 's':
-          size = string(va_arg(arg, char *), str, zeroflag, width);
-          break;
-        default:
-          *(str) = *(fmt);
-          size = 1;
-          break;
+      case 'd':
+        size = decimal(va_arg(arg, int), str, zeroflag, width);
+        break;
+      case 'x':
+        size = hex(va_arg(arg, int), str, zeroflag, width);
+        break;
+      case 's':
+        size = string(va_arg(arg, char *), str, zeroflag, width);
+        break;
+      default:
+        *(str) = *(fmt);
+        size = 1;
+        break;
       }
       fmt++;
       str += size;
@@ -103,9 +102,7 @@ int vsprintf(char *str, const char *fmt, va_list arg)
   return len;
 }
 
-
-int sprintf(char *str, const char *fmt, ...)
-{
+int sprintf(char *str, const char *fmt, ...) {
   va_list arg;
   int len;
 
@@ -117,8 +114,7 @@ int sprintf(char *str, const char *fmt, ...)
   return len;
 }
 
-unsigned int strlen(const char *s)
-{
+unsigned int strlen(const char *s) {
   int i = 0;
   while (*s != 0) {
     ++i;
@@ -127,9 +123,7 @@ unsigned int strlen(const char *s)
   return i;
 }
 
-
-int strncmp(const char *s1, const char *s2, unsigned int n)
-{
+int strncmp(const char *s1, const char *s2, unsigned int n) {
   for (int i = 0; i < n; ++i) {
     if (*s1 == *s2) {
       s1++;
@@ -140,8 +134,7 @@ int strncmp(const char *s1, const char *s2, unsigned int n)
   }
   return 0;
 }
-int strcmp(const char *s1, const char *s2)
-{
+int strcmp(const char *s1, const char *s2) {
   return strncmp(s1, s2, strlen(s2));
 }
 
@@ -149,8 +142,7 @@ int strcmp(const char *s1, const char *s2)
 #define m 2147483647
 #define q (m / a)
 #define r (m % a)
-long int rand()
-{
+long int rand() {
   int seed = 1;
   long int hi = seed / q;
   long int lo = seed % q;
@@ -162,15 +154,23 @@ long int rand()
   return seed;
 }
 
-int memcmp(const void *buf1, const void *buf2, unsigned int n)
-{
+int memcmp(const void *buf1, const void *buf2, unsigned int n) {
   for (int i = 0; i < n; i++) {
-    if (((unsigned char *)buf1)[i] != ((unsigned char *)buf2)[i]) 
-      return ((unsigned char * )buf1)[i] - ((unsigned char *)buf2)[i];
+    if (((unsigned char *)buf1)[i] != ((unsigned char *)buf2)[i])
+      return ((unsigned char *)buf1)[i] - ((unsigned char *)buf2)[i];
   }
   return 0;
 }
 
-long strtol(char *s, char **t, int n)
-{
+long strtol(char *p, char **endptr, int base) {
+    int j, k;
+    for (j = 0; '0' <= p[j] && p[j] <= '9'; j++) {}
+    int i = 0;
+    k = j;
+    j--;
+    for (int n = 1; j >= 0; j--, n *= 10) {
+      i += (p[j] - '0') * n;
+    }
+    *endptr = p + k;
+    return i;
 }
