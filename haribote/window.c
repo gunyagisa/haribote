@@ -106,7 +106,13 @@ void make_textbox8(struct SHEET *sht, int x0, int y0, int sx, int sy, int c)
 
 void str_renderer_sht(struct SHEET *sht, int x, int y, int c, int b, char *s, int l)
 {
+  struct TASK *task = task_now();
   boxfill8(sht->buf, sht->bxsize, b, x, y, x + l * 8 - 1, y + 15);
-  str_renderer8(sht->buf, sht->bxsize, c, x, y, s);
-  sheet_refresh(sht, x, y, x + l * 8, y + 16);
+  if (task->langmode != 0 && task->langbyte1 != 0) {
+    str_renderer8(sht->buf, sht->bxsize, c, x, y, s);
+    sheet_refresh(sht, x-8, y, x + l * 8, y + 16);
+  } else {
+    str_renderer8(sht->buf, sht->bxsize, c, x, y, s);
+    sheet_refresh(sht, x, y, x + l * 8, y + 16);
+  }
 }
