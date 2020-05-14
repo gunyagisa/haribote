@@ -53,8 +53,6 @@ $(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys $(addprefix $(BUILD), $
 	mcopy ./nihongo/nihongo.fnt -i $@ ::
 	mcopy ./stars2.hrb -i $@ ::
 	mcopy ./euc.txt -i $@ ::
-	mcopy ./miku.jpg -i $@ ::
-	mcopy ./fujisan.jpg -i $@ ::
 
 run: $(BUILD)geocide.img
 	$(QEMU) -m 32 -d guest_errors -fda $< -show-cursor -monitor stdio
