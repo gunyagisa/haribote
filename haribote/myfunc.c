@@ -170,3 +170,7 @@ int memcmp(const void *buf1, const void *buf2, unsigned int n)
   }
   return 0;
 }
+
+long strtol(char *s, char **t, int n)
+{
+}

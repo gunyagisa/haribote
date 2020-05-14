@@ -351,7 +351,7 @@ static int tek_rdget1(struct tek_STR_RNGDEC *rd, tek_TPRB *prob0, int n, int j,
         if (tek_rdget1(rd, &rd->probs.fchglt, 0x71, 0, &rd->bm[3]) == 0) {
 
         err:
-          longjmp(rd->errjmp, 1);
+          __builtin_longjmp(rd->errjmp, 1);
         }
         i = bm - rd->bm;
         if ((bm->s = tek_rdget1(rd, &rd->probs.fchgprm[i * 2 + bm->s], 0x71, 0,
@@ -451,7 +451,7 @@ static int tek_decmain5(int *work, UCHAR *src, int osiz, UCHAR *q, int lc,
   rd->code = src[0] << 24 | src[1] << 16 | src[2] << 8 | src[3];
   for (i = 0; i < 4; i++)
     rep[i] = ~i;
-  if (setjmp(rd->errjmp))
+  if (__builtin_setjmp(rd->errjmp))
     goto err;
   for (i = sizeof(struct tek_STR_PRB) / sizeof(tek_TPRB) +
            (0x300 << (lc + lp)) - 2;
