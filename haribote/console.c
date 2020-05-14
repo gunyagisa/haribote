@@ -110,7 +110,7 @@ void cmd_mem(struct CONSOLE *cons, unsigned int memtotal)
 {
   struct MEMMAN *memman = (struct MEMMAN *) MEMMAN_ADDR;
   char s[30];
-  sprintf(s, "total %dMB\nfree %dKB\n\n", memtotal / (1024 * 1024), memman_total(memman) / 1024);
+  __builtin_sprintf(s, "total %dMB\nfree %dKB\n\n", memtotal / (1024 * 1024), memman_total(memman) / 1024);
   cons_putstr0(cons, s);
 }
 
@@ -168,7 +168,7 @@ int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline)
   struct MEMMAN *memman = (struct MEMMAN *) MEMMAN_ADDR;
   char *p, name[18], *q;
   struct TASK *task = task_now();
-  int segsiz, datsiz, esp, dathrb;
+  int segsiz, datsiz, esp, dathrb, appsiz;
 
   int i;
   for (i = 0; i < 13; i++) {
@@ -188,8 +188,8 @@ int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline)
   }
 
   if (finfo != 0) {
-    p = (char *) memman_alloc_4k(memman, finfo->size);
-    file_loadfile(finfo->clustno, finfo->size, p, fat, (char *) (DISKIMG_ADDR + 0x003e00));
+    appsiz = finfo->size;
+    p = file_loadfile2(finfo->clustno, &appsiz, fat);
     if (finfo->size >= 36 && strncmp(p + 4, "Hari", 4) == 0 && *p == 0x00) {
       segsiz = *((int *) (p + 0x0000));
       esp    = *((int *) (p + 0x000c));
@@ -218,7 +218,7 @@ int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline)
         }
       }
       timer_cancelall(&task->fifo);
-      memman_free_4k(memman, (int) q, segsiz);
+      memman_free_4k(memman, (int) p, segsiz);
       task->langbyte1 = 0;
     } else {
       cons_putstr0(cons, ".hrb file format error.\n");
@@ -562,10 +562,9 @@ int * hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int
           (struct FILEINFO *) (DISKIMG_ADDR + 0x002600), 224);
       if (finfo != 0) {
         reg[7] = (int) fh;
-        fh->buf = (char *) memman_alloc_4k(memman, finfo->size);
         fh->size = finfo->size;
         fh->pos = 0;
-        file_loadfile(finfo->clustno, finfo->size, fh->buf, task->fat, (char *) (DISKIMG_ADDR + 0x003e00));
+        fh->buf = file_loadfile2(finfo->clustno, &fh->size, task->fat);
       }
     }
   } else if (edx == 22) {

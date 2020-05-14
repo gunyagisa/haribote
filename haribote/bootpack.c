@@ -179,14 +179,16 @@ void HariMain(void)
   fifo32_put(&keycmd, KEYCMD_LED);
   fifo32_put(&keycmd, key_leds);
 
-  unsigned char *nihongo = (unsigned char * ) memman_alloc_4k(memman, 16 * 256 + 32 * 94 * 47);
+  unsigned char *nihongo;
   int *fat = (int *) memman_alloc_4k(memman, 4 * 2800);
   file_readfat(fat, (unsigned char *) (DISKIMG_ADDR + 0x000200));
   struct FILEINFO *finfo = file_search("nihongo.fnt", 
       (struct FILEINFO *) (DISKIMG_ADDR + 0x002600), 224);
   if (finfo != 0) {
-    file_loadfile(finfo->clustno, finfo->size, (char *) nihongo, fat, (char *) (DISKIMG_ADDR + 0x003e00));
+    int i = finfo->size;
+    nihongo = file_loadfile2(finfo->clustno, &i, fat);
   } else {
+    nihongo = (unsigned char *) memman_alloc_4k(memman, 16 * 256 + 32 * 94 * 47);
     for (int i = 0; i < 16 * 256; i++) {
       nihongo[i] = hankaku[i];
     }

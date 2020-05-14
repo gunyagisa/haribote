@@ -167,6 +167,7 @@ struct FILEINFO {
 };
 void file_readfat(int *, unsigned char *);
 void file_loadfile(int ,int ,char * , int *, char *);
+char * file_loadfile2(int clustno, int *psize, int *fat);
 struct FILEINFO * file_search(char *cmdline, struct FILEINFO *finfo, int max);
 
 // myfunc.c

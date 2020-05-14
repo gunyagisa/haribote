@@ -161,3 +161,12 @@ long int rand()
     seed = test + m;
   return seed;
 }
+
+int memcmp(const void *buf1, const void *buf2, unsigned int n)
+{
+  for (int i = 0; i < n; i++) {
+    if (((unsigned char *)buf1)[i] != ((unsigned char *)buf2)[i]) 
+      return ((unsigned char * )buf1)[i] - ((unsigned char *)buf2)[i];
+  }
+  return 0;
+}
