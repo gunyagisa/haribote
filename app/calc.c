@@ -1,9 +1,7 @@
 #include "applib.h"
+#include "myfunc.h"
 
 #define INVALID -0x7fffffff
-
-int strtol(char *s, char **endp,
-           int base); 
 
 char *skipspace(char *p);
 int getnum(char **pp, int priority);
@@ -61,15 +59,7 @@ int getnum(char **pp, int priority) {
       i = INVALID;
     }
   } else if ('0' <= *p && *p <= '9') { 
-    int j, k;
-    for (j = 0; '0' <= p[j] && p[j] <= '9'; j++) {}
-    i = 0;
-    k = j;
-    j--;
-    for (int n = 1; j >= 0; j--, n *= 10) {
-      i += (p[j] - '0') * n;
-    }
-    p += k;
+    strtol(p, &p, 0);
   } else { 
     i = INVALID;
   }
