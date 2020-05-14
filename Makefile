@@ -1,5 +1,5 @@
 OBJ = bootpack.o dsctbl.o fifo.o graphic.o hankaku.o interrupt.o keyboard.o mouse.o nasmfunc.o memory.o sheet.o timer.o mtask.o window.o console.o file.o myfunc.o
-HRB = beepdown.hrb color.hrb hello4.hrb winhello.hrb sosu.hrb cat.hrb
+HRB = beepdown.hrb color.hrb hello4.hrb winhello.hrb sosu.hrb cat.hrb iroha.hrb
 BUILD = ./build-cache/
 SRC = ./haribote/
 APP_SRC = ./app/
@@ -45,6 +45,7 @@ $(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys $(addprefix $(BUILD), $
 	mcopy $(SRC)ipl.asm -i $@ ::
 	mcopy ./Makefile -i $@ ::
 	mcopy ./build-cache/*.hrb -i $@ ::
+	mcopy ./nihongo.fnt -i $@ ::
 
 run: $(BUILD)geocide.img
 	$(QEMU) -m 32 -d guest_errors -fda $< -show-cursor -monitor stdio

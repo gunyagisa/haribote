@@ -97,11 +97,12 @@ void font_renderer8(unsigned char *vram, int xsize, char color_code, int x, int 
   }
 }
 
-void str_renderer8(unsigned char *buf, int xsize, char color_code, int x, int y, char *str)
+void str_renderer8(unsigned char *buf, int xsize, char color_code, int x, int y, unsigned char *str)
 {
   extern char hankaku[4096];
   struct TASK *task = task_now();
-  char *nihongo = (char *) *((int *) 0xfe8);
+  char *nihongo = (char *) *((int *) 0x0fe8), *font;
+  int k, t;
 
   if (task->langmode == 0) {
     for (; *str != 0x00; str++) {
@@ -110,8 +111,32 @@ void str_renderer8(unsigned char *buf, int xsize, char color_code, int x, int y,
     }
   }
   if (task->langmode == 1) {
-    for (;*str != 0x00;str++) {
-      font_renderer8(buf, xsize, color_code, x, y, hankaku + *str * 16);
+    for (; *str != 0x00; str++) {
+      if (task->langbyte1 == 0) {
+        if ((0x81 <= *str && *str <= 0x9f) || (0xe0 <= *str && *str <= 0xfc)) {
+          task->langbyte1 = *str;
+        } else {
+          font_renderer8(buf, xsize, color_code, x, y, nihongo + *str * 16);
+        }
+      } else {
+        if (0x81 <= task->langbyte1 && task->langbyte1 <= 0x9f) {
+          k = (task->langbyte1 - 0x81) * 2;
+        } else {
+          k = (task->langbyte1 - 0xe0) * 2 + 62;
+        }
+        if (0x40 <= *str && *str <= 0x7e) {
+          t = *str - 0x40;
+        } else if(0x80 <= *str && *str <= 0x9e) {
+          t = *str - 0x80 + 63;
+        } else {
+          t = *str - 0x9f;
+          k++;
+        }
+        task->langbyte1 = 0;
+        font = nihongo + 256 * 16 + (k * 94 + t) * 32;
+        font_renderer8(buf, xsize, color_code, x - 8, y, font);
+        font_renderer8(buf, xsize, color_code, x, y, font + 16);
+      }
       x += 8;
     }
   }

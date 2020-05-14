@@ -219,6 +219,7 @@ int cmd_app(struct CONSOLE *cons, int *fat, char *cmdline)
       }
       timer_cancelall(&task->fifo);
       memman_free_4k(memman, (int) q, segsiz);
+      task->langbyte1 = 0;
     } else {
       cons_putstr0(cons, ".hrb file format error.\n");
     }
@@ -236,13 +237,8 @@ void console_task(struct SHEET *sht, unsigned int memtotal)
   int i, *fat = (int *) memman_alloc_4k(memman, 4 * 2800);
   char cmdline[30];
   struct FILEHANDLE fhandle[8];
-  unsigned char *nihongo = (char *) *((int *) 0xfe8);
+  unsigned char *nihongo = (unsigned char *) *((int *) 0xfe8);
 
-  if (nihongo[4096] != 0xff) {
-    task->langmode = 1;
-  } else {
-    task->langmode = 0;
-  }
   struct CONSOLE cons;
   cons.sht = sht;
   cons.cur_x = 8;
@@ -256,13 +252,20 @@ void console_task(struct SHEET *sht, unsigned int memtotal)
     timer_init(cons.timer, &task->fifo, 1);
     settimer(cons.timer, 50);
   }
+  file_readfat(fat, (unsigned char *) (DISKIMG_ADDR + 0x000200));
+
+  task->fhandle = fhandle;
+  task->fat = fat;
   for (int i = 0; i < 8; i ++) {
     fhandle[i].buf = 0;
   }
-  task->fhandle = fhandle;
-  task->fat = fat;
 
-  file_readfat(fat, (unsigned char *) (DISKIMG_ADDR + 0x000200));
+  if (nihongo[4096] != 0xff) {
+    task->langmode = 1;
+  } else {
+    task->langmode = 0;
+  }
+  task->langbyte1 = 0;
 
   cons_putchar(&cons, '>', 1);
 
@@ -337,6 +340,7 @@ void console_task(struct SHEET *sht, unsigned int memtotal)
 void cons_newline(struct CONSOLE *cons)
 {
   struct SHEET *sheet = cons->sht;
+  struct TASK *task = task_now();
   if (cons->cur_y < 28 + 112) {
     cons->cur_y += 16;
   } else {
@@ -355,6 +359,9 @@ void cons_newline(struct CONSOLE *cons)
     }
   }
   cons->cur_x = 8;
+  if (task->langmode == 1 && task->langbyte1 != 0) {
+    cons->cur_x += 8;
+  }
 }
 
 void cons_putstr0(struct CONSOLE *cons, char *s)

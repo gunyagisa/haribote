@@ -1,6 +1,6 @@
 ; geocide
-	CYLS EQU	10
-    org 0x7c00
+CYLS EQU	20
+org 0x7c00
 
 ; FAT12 setting
     JMP    SHORT entry
@@ -101,5 +101,5 @@ msg2:
 	DB		0
 
 	TIMES	0x01fe-($-$$) DB 0
-
+; 0x7dfeまでを0x00で埋める
 	DB		0x55, 0xaa

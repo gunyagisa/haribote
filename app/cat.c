@@ -6,7 +6,7 @@ void HariMain()
   char c, cmdline[30], *p;
 
   api_cmdline(cmdline, 30);
-  for (p = cmdline; *p < ' '; p++) {}
+  for (p = cmdline; *p > ' '; p++) {}
   for (; *p == ' '; p++) {}
   fh = api_fopen(p);
   if (fh != 0) {
