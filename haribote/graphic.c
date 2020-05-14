@@ -140,6 +140,25 @@ void str_renderer8(unsigned char *buf, int xsize, char color_code, int x, int y,
       x += 8;
     }
   }
+  if (task->langmode == 2) {
+    for (; *str != 0x00; str++) {
+      if (task->langbyte1 == 0) {
+        if (0x81 <= *str && *str <= 0xfe) {
+          task->langbyte1 = *str;
+        } else {
+          font_renderer8(buf, xsize, color_code, x, y, nihongo + *str * 16);
+        }
+      } else {
+        k = task->langbyte1 - 0xa1;
+        t = *str - 0xa1;
+        task->langbyte1 = 0;
+        font = nihongo + 256 * 16 + (k * 94 + t) * 32;
+        font_renderer8(buf, xsize, color_code, x - 8, y, font);
+        font_renderer8(buf, xsize, color_code, x, y, font + 16);
+      }
+      x += 8;
+    }
+  }
 }
 
 void init_mouse_cursor8(char *mouse, char back_color)

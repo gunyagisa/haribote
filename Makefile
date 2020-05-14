@@ -46,6 +46,7 @@ $(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys $(addprefix $(BUILD), $
 	mcopy ./Makefile -i $@ ::
 	mcopy ./build-cache/*.hrb -i $@ ::
 	mcopy ./nihongo.fnt -i $@ ::
+	mcopy ./euc.txt -i $@ ::
 
 run: $(BUILD)geocide.img
 	$(QEMU) -m 32 -d guest_errors -fda $< -show-cursor -monitor stdio
