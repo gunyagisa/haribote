@@ -1,6 +1,6 @@
 void api_putchar(int c);
 void api_putstr0(char *s);
-void apit_putstr1(char *s, int l);
+void api_putstr1(char *s, int l);
 int api_openwin(char *buf, int xsize, int ysize, int col_inv, char*title);
 void api_closewin(int win);
 void api_putstrwin(int win, int x, int y, int col, int len, char *str);
@@ -25,3 +25,4 @@ int api_fsize(int fhandle, int mode);
 int api_fread(char *buf, int maxsize, int fhandle);
 int api_cmdline(char *buf, int maxsize);
 int api_getlang(void);
+void api_write_serial(char *s);

@@ -631,6 +631,8 @@ int * hrb_api(int edi, int esi, int ebp, int esp, int ebx, int edx, int ecx, int
     reg[7] = i;
   } else if (edx == 27) { // api_getlang
     reg[7] = task->langmode;
+  } else if (edx == 28) { // api_write_serial
+    write_serial(eax & 0xff);
   }
   return 0;
 }

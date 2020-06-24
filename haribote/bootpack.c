@@ -135,6 +135,9 @@ void HariMain(void)
   io_out8(PIC0_IMR, 0xf8);
   io_out8(PIC1_IMR, 0xef);
 
+  serial_init();
+  write_serial_str("[-]serial init finish\n");
+
   memtotal = memtest(0x00400000, 0xbfffffff);
   memman_init(memman);
   memman_free(memman, 0x00001000, 0x0009e000);
@@ -198,6 +201,7 @@ void HariMain(void)
   }
   *((int *) 0xfe8) = (int) nihongo;
   memman_free_4k(memman, (int) fat, 4 * 2880);
+
 
 
   for (;;) {

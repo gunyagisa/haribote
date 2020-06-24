@@ -181,3 +181,9 @@ unsigned int strlen(const char *);
 int strncmp(const char *, const char *, unsigned int);
 int strcmp(const char *, const char *);
 
+// serial.c
+void serial_init(void);
+int is_serial_empty();
+void write_serial(char a);
+void write_serial_str(char *str);
+
