@@ -127,6 +127,11 @@ void HariMain(void)
 
   *((int *) 0xfec) = (int) &fifo;
 
+  serial_init();
+  write_serial_str("Hello!!\n");
+  write_serial_str("[-]initialize start\n");
+
+
   init_pit();         // PIT configure
 
   init_keyboard(&fifo, 256);
@@ -135,8 +140,6 @@ void HariMain(void)
   io_out8(PIC0_IMR, 0xf8);
   io_out8(PIC1_IMR, 0xef);
 
-  serial_init();
-  write_serial_str("[-]serial init finish\n");
 
   memtotal = memtest(0x00400000, 0xbfffffff);
   memman_init(memman);

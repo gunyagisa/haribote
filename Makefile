@@ -28,7 +28,7 @@ $(BUILD)nasmfunc.o: $(SRC)nasmfunc.asm Makefile
 	nasm -f elf32 -o $@ $<
 
 $(BUILD)bootpack.bin: $(addprefix $(BUILD), $(OBJ))
-	ld -m elf_i386  -e HariMain -o $@ $^ -T har.ld
+	ld -m elf_i386  -e HariMain -o $@ $^ -T har.ld --print-map
 
 $(BUILD)geocide.sys: $(BUILD)asmhead.bin $(BUILD)bootpack.bin
 	cat $< $(BUILD)bootpack.bin > $@
@@ -46,14 +46,8 @@ $(BUILD)gview.hrb: $(BUILD)gview.o $(BUILD)jpeg.o $(BUILD)bmp.o
 	ld $^ -o $@ -e HariMain -m elf_i386 -T binary.ld -L $(APP_SRC) -lapi -lfunc
 
 $(BUILD)geocide.img: $(BUILD)ipl.bin $(BUILD)geocide.sys $(addprefix $(BUILD), $(HRB)) Makefile
-	mformat -f 1440 -C -B $< -i $@ ::
+	mformat -f 1440 -C -B $(BUILD)ipl.bin -i $@ ::
 	mcopy $(BUILD)geocide.sys -i $@ ::
-	mcopy $(SRC)ipl.asm -i $@ ::
-	mcopy ./Makefile -i $@ ::
-	mcopy ./build-cache/*.hrb -i $@ ::
-	mcopy ./nihongo/nihongo.fnt -i $@ ::
-	mcopy ./stars2.hrb -i $@ ::
-	mcopy ./euc.txt -i $@ ::
 
 run: $(BUILD)geocide.img
 	$(QEMU) -m 32 -d guest_errors -fda $< -show-cursor -serial stdio
