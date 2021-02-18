@@ -5,6 +5,8 @@
 #include "mouse.h"
 #include "keyboard.h"
 #include "dsctbl.h"
+#include "pci.h"
+#include <stdint.h>
 
 
 #define KEYCMD_LED      0xed
@@ -130,6 +132,21 @@ void HariMain(void)
   serial_init();
   write_serial_str("Hello!!\n");
   write_serial_str("[-]initialize start\n");
+
+  write_serial_str("[+]PCI device list\n");
+  char buf[256];
+  for (uint8_t i = 0; i < 0xff; ++i) {
+    for (int j = 0; j < 32; ++j) {
+      uint16_t dev, vend;
+      if ((vend = PCIConfigReadWord(i, j, 0, 0)) != 0xffff) {
+        // デバイスが存在する
+        dev = PCIConfigReadWord(i, j, 0, 2);
+
+        sprintf(buf, "bus=%d, dev=%x, vend=%x\n", i, dev, vend);
+        write_serial_str(buf);
+      }
+    }
+  }
 
 
   init_pit();         // PIT configure
